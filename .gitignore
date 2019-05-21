@@ -40,7 +40,11 @@ nosetests.xml
 
 # Virtual environment
 venv
+.idea
 .idea/workspace.xml
 ../.idea/workspace.xml
 ../README.md
 .idea/encodings.xml
+
+#Gurobi licence file
+/cm/gurobi_install/gurobi.lic
