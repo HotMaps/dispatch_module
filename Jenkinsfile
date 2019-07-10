@@ -1,7 +1,7 @@
 node {
   stage('Init') {
     checkout scm
-    sh 'cp /home/jenkins/hotmaps/gurobi.lic ./gurobi_install/gurobi.lic'
+    sh 'cp /home/jenkins/hotmaps/gurobi.lic ./gurobi_install/'
   }
     
   stage('Build & Test') {
