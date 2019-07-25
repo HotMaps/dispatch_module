@@ -1,4 +1,3 @@
-
 from flask import request, abort, jsonify ,url_for, g,flash
 from . import api
 from .. import SIGNATURE,CM_NAME
@@ -135,15 +134,15 @@ def compute():
 
     inputs_parameter_selection = helper.validateJSON(data["inputs_parameter_selection"])
 
-
+    """
 
     inputs_vector_selection = helper.validateJSON(data["inputs_vector_selection"])
     print ('inputs_vector_selection', inputs_vector_selection)
     LOGGER.info('inputs_vector_selection', inputs_vector_selection)
-
+    """
     output_directory = UPLOAD_DIRECTORY
     # call the calculation module function
-    result = calculation_module.calculation(output_directory, inputs_raster_selection,inputs_vector_selection,inputs_parameter_selection)
+    result = calculation_module.calculation(output_directory, inputs_raster_selection,inputs_parameter_selection)
 
     response = {
         'result': result

@@ -48,3 +48,5 @@ venv
 
 #Gurobi licence file
 /cm/gurobi_install/gurobi.lic
+
+\.spyproject/
