@@ -22,3 +22,4 @@ networkx
 pyomo
 fiona==1.8.4
 geopandas==0.5.1
+xlrd==1.2.0
