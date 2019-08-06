@@ -22,7 +22,9 @@ def calculation(output_directory, inputs_raster_selection, inputs_parameter_sele
     (nuts0, nuts1, nuts2, nuts3),message  = return_nuts_codes(path_nuts_id_tif)
     
     ds = gdal.Open(inputs_raster_selection["heat"])
-    hdm_sum  = ds.ReadAsArray().sum()
+    # get raster band
+    b = ds.GetRasterBand(1)
+    hdm_sum  = b.ReadAsArray().sum()
     
     p,message = get_max_heat_point(inputs_raster_selection["heat"])
     if p != -1:
