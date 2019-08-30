@@ -544,8 +544,6 @@ INPUTS_CALCULATION_MODULE = [   {   'cm_id': CM_ID,
         'input_unit': 'none',
         'input_value': ['invest', 'dispatch']}]
 
-#from .api_v1.my_calculation_module_directory.input_widgets import load_input_widgets
-#INPUTS_CALCULATION_MODULE,_ = load_input_widgets(CM_ID)
 
 
 SIGNATURE = {
