@@ -546,6 +546,7 @@ INPUTS_CALCULATION_MODULE = [   {   'cm_id': CM_ID,
 
 
 
+
 SIGNATURE = {
 
     "category": "Buildings",
