@@ -150,9 +150,6 @@ def compute():
 
     }
 
- #   LOGGER.info('response', response)
-
-#    LOGGER.info("type response ",type(response))
     # convert response dict to json
     response = json.dumps(response)
     return response
