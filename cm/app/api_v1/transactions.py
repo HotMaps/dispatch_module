@@ -149,7 +149,6 @@ def compute():
 
 
     }
-
     # convert response dict to json
     response = json.dumps(response)
     return response
