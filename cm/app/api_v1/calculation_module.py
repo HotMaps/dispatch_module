@@ -77,7 +77,7 @@ def calculation(output_directory, inputs_raster_selection, inputs_parameter_sele
     else:
         graphics = []
         result = dict()
-        result['indicator'] = [{"unit": "", "name": "Error Notification","value":message}]
+        result['indicator'] = [{"unit": " ", "name": "Error Notification","value":message}]
     
     print("calculation finished")
     print(f"Errors:{message}")
