@@ -61,7 +61,7 @@ def calculation(output_directory, inputs_raster_selection, inputs_parameter_sele
                     dict(type="bar",label="Thermal Generation Mix"),
                     dict(type="pie",label="Thermal Generation Mix"),
                     dict(type="bar",label="Full Load Hours"),
-                    dict(type="line",label="Heat Price"),
+#                    dict(type="line",label="Heat Price"),
                     ]
         graphics = [ dict( type = x["type"],
                            data = dict( labels = solution["Technologies"] if x["type"]!="line" else [x["label"]],
@@ -78,7 +78,8 @@ def calculation(output_directory, inputs_raster_selection, inputs_parameter_sele
         graphics = []
         result = dict()
         result['indicator'] = [{"unit": " ", "name": "Error Notification","value":message}]
-    
+        
+    print(graphics)
     print("calculation finished")
     print(f"Errors:{message}")
     return result
