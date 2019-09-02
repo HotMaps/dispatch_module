@@ -184,7 +184,7 @@ def preprocessing(data,inv_flag):
         
     pyomo_data = {None:pyomo_data} if ok_flag else -1
     
-    message = None if ok_flag else f"The installed capacities are not enough to cover the load, (max_demand: {str(max_demad)} & installed cap:{str(max_installed_caps)})"    
+    message = None if ok_flag else f"The installed capacities are not enough to cover the load (max_demand: {str(max_demad)} & installed cap:{str(max_installed_caps)})"    
     
     
     return pyomo_data,message
