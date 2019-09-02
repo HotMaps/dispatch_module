@@ -22,7 +22,10 @@ def get_user_input(inputs_parameter_selection,nuts,path=path_inputs_parameter):
         tec,key = val.split("_")
         tec = tec.strip()
         key = key.strip()
-        out[key] = {**out.get(key,{}),**{tec:inputs_parameter_selection[val]}}
+        try:
+            out[key] = {**out.get(key,{}),**{tec:float(inputs_parameter_selection[val])}}
+        except:
+            out[key] = {**out.get(key,{}),**{tec:inputs_parameter_selection[val]}}
     for k in ["pCO2","ir","if"]:
         out = {**out,**out.pop(k)}
     list_of_tuples = [(("electricity_price_t","price_profiles"),(nuts[0],2015)),
