@@ -66,7 +66,7 @@ def calculation(output_directory, inputs_raster_selection, inputs_parameter_sele
         graphics = [ dict( type = x["type"],
                            data = dict( labels = solution["Technologies"] if x["type"]!="line" else [x["label"]],
                                         datasets = [ dict(label=x["label"], 
-                                                          data = solution[x["label"]])] )) for x in list_of_tuples]
+                                                          data = [solution[x["label"]][y] for y in solution["Technologies"]] if x["type"]!="line" else solution[x["label"]])] )) for x in list_of_tuples]
         result = dict()
         result['name'] = CM_NAME
         result['indicator'] = [{"unit": "EUR", "name": "Anual Total Costs","value":solution['Anual Total Costs']}]
