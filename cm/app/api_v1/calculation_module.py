@@ -55,6 +55,26 @@ def calculation(output_directory, inputs_raster_selection, inputs_parameter_sele
         solution = -1
 #    print(solution)
 
+    color_blind_palette= {   3: ['#0072B2', '#E69F00', '#F0E442'],
+        4: ['#0072B2', '#E69F00', '#F0E442', '#009E73'],
+        5: ['#0072B2', '#E69F00', '#F0E442', '#009E73', '#56B4E9'],
+        6: ['#0072B2', '#E69F00', '#F0E442', '#009E73', '#56B4E9', '#D55E00'],
+        7: [   '#0072B2',
+               '#E69F00',
+               '#F0E442',
+               '#009E73',
+               '#56B4E9',
+               '#D55E00',
+               '#CC79A7'],
+        8: [   '#0072B2',
+               '#E69F00',
+               '#F0E442',
+               '#009E73',
+               '#56B4E9',
+               '#D55E00',
+               '#CC79A7',
+               '#000000']}
+  
     # output geneneration of the output
     if solution !=-1:
         list_of_tuples = [
@@ -65,7 +85,8 @@ def calculation(output_directory, inputs_raster_selection, inputs_parameter_sele
                     ]
         graphics = [ dict( type = x["type"],
                            data = dict( labels = solution["Technologies"] if x["type"]!="line" else [x["label"]],
-                                        datasets = [ dict(label=x["label"], 
+                                        datasets = [ dict(label=x["label"],
+                                                          backgroundColor = color_blind_palette[len(solution["Technologies"])] if x["type"]!="line" else ['#0072B2'],
                                                           data = [solution[x["label"]][y] for y in solution["Technologies"]] if x["type"]!="line" else solution[x["label"]])] )) for x in list_of_tuples]
         result = dict()
         result['name'] = CM_NAME
