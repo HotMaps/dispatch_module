@@ -3,6 +3,7 @@
 # C extensions
 *.so
 
+
 # Packages
 *.egg
 *.egg-info
@@ -48,3 +49,5 @@ venv
 
 #Gurobi licence file
 /cm/gurobi_install/gurobi.lic
+
+.vscode

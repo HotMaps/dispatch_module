@@ -26,7 +26,7 @@ INPUTS_CALCULATION_MODULE = [
      'input_parameter_name': 'multiplication_factor',
      'input_value': '1',
      'input_priority': 0,
-     'input_unit': 'none',
+     'input_unit': '',
      'input_min': 0,
      'input_max': 10, 'cm_id': CM_ID  # Do no change this value
      },
@@ -42,7 +42,7 @@ SIGNATURE = {
         "heat_tot_curr_density",
     ],
     "type_layer_needed": [
-        "heat",
+        {"type": "heat", "description": "You can choose the layer of type 'heat'."}
     ],
     "vectors_needed": [
         "heating_technologies_eu28",
