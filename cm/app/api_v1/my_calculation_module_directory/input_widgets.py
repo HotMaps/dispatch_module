@@ -19,6 +19,6 @@ def load_input_widgets(CM_ID,path=path_inputs_parameter):
 if __name__ == "__main__":
     print('Main: input_widgets.py')
     x,_= load_input_widgets("XX")
-#    import pprint
-#    pp = pprint.PrettyPrinter(indent=4)
-#    pp.pprint(x)
+    import pprint
+    pp = pprint.PrettyPrinter(indent=4)
+    pp.pprint(x)

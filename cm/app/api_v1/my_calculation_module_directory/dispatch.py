@@ -46,6 +46,7 @@ def run(data,inv_flag):
     m.alpha_j = pyo.Param(m.j)
     m.lt_j = pyo.Param(m.j)
     m.ir = pyo.Param()
+    m.max_rad = pyo.Param()
     #%% decision variables 
     m.x_th_jt = pyo.Var(m.j,m.t,within=pyo.NonNegativeReals)
     m.x_el_jt = pyo.Var(m.j,m.t,within=pyo.NonNegativeReals)
@@ -87,7 +88,7 @@ def run(data,inv_flag):
 
     #% The solar gains depend on the installed capacity and the solar radiation
     def solar_restriction_jt_rule(m,j,t):
-        return m.x_th_jt[j,t] <=  m.Cap_j[j]*m.radiation_t[t]/1000
+        return m.x_th_jt[j,t] <=  m.Cap_j[j]*m.radiation_t[t]/m.max_rad
     m.solar_restriction_jt = pyo.Constraint(m.j_st,m.t,rule=solar_restriction_jt_rule)
 
     #% Restriction for the Heat Pumps in the cold Seasion

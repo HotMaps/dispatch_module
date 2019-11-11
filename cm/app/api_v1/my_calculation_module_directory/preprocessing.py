@@ -162,15 +162,16 @@ def preprocessing(data,inv_flag):
     j_chp =     ["CHP"]
     j_bp =      ["Heat Boiler"]
     
+    max_rad = max(radiation_t.values())
     args = [tec, j_hp, j_st, j_waste, j_chp, j_bp, demand_th_t, max_demad, 
             radiation_t, OP_fix_j, n_el_j, electricity_price_t, mc_jt, n_th_j,
             x_th_cap_j,c_ramp_chp, c_ramp_waste, OP_var_j, temperature_t, thresh,
-            sale_electricity_price_t,all_heat_geneartors,IK_j,lt_j,ir,alpha_j]
+            sale_electricity_price_t,all_heat_geneartors,IK_j,lt_j,ir,alpha_j,max_rad]
     
     keys = ['j', 'j_hp', 'j_st', 'j_waste', 'j_chp', 'j_bp', 'demand_th_t', 'max_demad', 
             'radiation_t', 'OP_fix_j', 'n_el_j', 'electricity_price_t', 'mc_jt', 'n_th_j', 
             'x_th_cap_j', 'c_ramp_chp', 'c_ramp_waste', 'OP_var_j', 'temperature_t', 'thresh', 
-            'sale_electricity_price_t', 'all_heat_geneartors',"IK_j","lt_j","ir","alpha_j"]
+            'sale_electricity_price_t', 'all_heat_geneartors',"IK_j","lt_j","ir","alpha_j","max_rad"]
     
     val = dict(zip(keys,args))
     
