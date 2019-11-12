@@ -77,20 +77,46 @@ def calculation(output_directory, inputs_raster_selection, inputs_parameter_sele
   
     # output geneneration of the output
     if solution !=-1:
-        list_of_tuples = [
-                    dict(type="bar",label="Thermal Generation Mix"),
-                    dict(type="pie",label="Thermal Generation Mix"),
-                    dict(type="bar",label="Full Load Hours"),
-#                    dict(type="line",label="Heat Price"),
-                    ]
-        graphics = [ dict( type = x["type"],
-                           data = dict( labels = solution["Technologies"] if x["type"]!="line" else [x["label"]],
-                                        datasets = [ dict(label=x["label"],
-                                                          backgroundColor = color_blind_palette[len(solution["Technologies"])] if x["type"]!="line" else ['#0072B2'],
-                                                          data = [solution[x["label"]][y] for y in solution["Technologies"]] if x["type"]!="line" else solution[x["label"]])] )) for x in list_of_tuples]
+        bar_graphs = ['Full Load Hours',
+				'Installed Capacities',
+				'LCOH',
+				'Investment Cost (with existing power plants)',
+				'Operational Cost',
+				'Fuel Costs',
+				'CO2 Costs',
+				'Ramping Costs',
+				'CO2 Emissions',
+				'Thermal Generation Mix',
+				'Electricity Generation Mix',
+				'Revenue From Electricity']
+        list_of_tuples = [ dict(type="bar",label=f"{x} ({solution['units'][x]})",key=x) for x in bar_graphs ]
+        
+        graphics = [ dict( xLabel="Technologies", 
+                           yLabel=x["label"], 
+                          type = x["type"], 
+                          data = dict( labels = list(solution[x['key']]), 
+                                      datasets = [ dict(  label=x["label"], 
+                                                          backgroundColor = color_blind_palette[len(list(solution[x['key']]))]  , 
+                                                          data = list(solution[x['key']].values()))] )) for x in list_of_tuples] 
+    
         result = dict()
         result['name'] = CM_NAME
-        result['indicator'] = [{"unit": "EUR", "name": "Anual Total Costs","value":solution['Anual Total Costs']}]
+        
+        
+        indicator_list =['Total LCOH',
+        				'Anual Total Costs',
+        				'Total Revenue From Electricity',
+        				'Total Thermal Generation',
+        				'Total Electricity Generation',
+        				'Total Investment Costs',
+        				'Total Operational Costs',
+        				'Total Fuel Costs',
+        				'Total CO2 Costs',
+        				'Total Ramping Costs',
+        				'Total CO2 Emissions']
+        
+        indicators = [{"unit":solution["units"][key], "name":key,"value":solution[key]} for key in indicator_list]
+        result['indicator'] = indicators
         result['graphics'] = graphics
         result['vector_layers'] = []
         result['raster_layers'] = []
@@ -98,11 +124,12 @@ def calculation(output_directory, inputs_raster_selection, inputs_parameter_sele
     else:
         graphics = []
         result = dict()
-        result['indicator'] = [{"unit": " ", "name": "Error Notification","value":message}]
         
-    print(graphics)
-    print("calculation finished")
-    print(f"Errors:{message}")
+        result['indicator'] = [dict(unit="-",name=f"Notification: {message}",value=0)]
+        
+    from pprint import pprint
+    pprint(result) 
+    
     return result
 
 

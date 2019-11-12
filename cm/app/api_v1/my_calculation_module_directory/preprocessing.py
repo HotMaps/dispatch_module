@@ -154,6 +154,10 @@ def preprocessing(data,inv_flag):
             alpha[ix] =  ( q**val * ir) / ( q**val - 1)
 
     alpha_j = {mapper[key]:alpha[key] for key in tec}
+ 
+    em_j = {mapper[j]:data["ef"][data["ec"][j]] for j in tec}
+    pco2 = data["pCO2"]
+    max_rad = max(radiation_t.values())
     
     tec =       ["Heat Pump","Solar Thermal Plant","Waste Inceneration Pant","CHP","Heat Boiler"]    
     j_hp =      ["Heat Pump"]
@@ -161,17 +165,17 @@ def preprocessing(data,inv_flag):
     j_waste =   ["Waste Inceneration Pant"]
     j_chp =     ["CHP"]
     j_bp =      ["Heat Boiler"]
-    
-    max_rad = max(radiation_t.values())
+
+
     args = [tec, j_hp, j_st, j_waste, j_chp, j_bp, demand_th_t, max_demad, 
             radiation_t, OP_fix_j, n_el_j, electricity_price_t, mc_jt, n_th_j,
             x_th_cap_j,c_ramp_chp, c_ramp_waste, OP_var_j, temperature_t, thresh,
-            sale_electricity_price_t,all_heat_geneartors,IK_j,lt_j,ir,alpha_j,max_rad]
+            sale_electricity_price_t,all_heat_geneartors,IK_j,lt_j,ir,alpha_j,max_rad,em_j,pco2]
     
     keys = ['j', 'j_hp', 'j_st', 'j_waste', 'j_chp', 'j_bp', 'demand_th_t', 'max_demad', 
             'radiation_t', 'OP_fix_j', 'n_el_j', 'electricity_price_t', 'mc_jt', 'n_th_j', 
             'x_th_cap_j', 'c_ramp_chp', 'c_ramp_waste', 'OP_var_j', 'temperature_t', 'thresh', 
-            'sale_electricity_price_t', 'all_heat_geneartors',"IK_j","lt_j","ir","alpha_j","max_rad"]
+            'sale_electricity_price_t', 'all_heat_geneartors',"IK_j","lt_j","ir","alpha_j","max_rad","em_j","pco2"]
     
     val = dict(zip(keys,args))
     
@@ -185,7 +189,7 @@ def preprocessing(data,inv_flag):
         
     pyomo_data = {None:pyomo_data} if ok_flag else -1
     
-    message = None if ok_flag else f"The installed capacities are not enough to cover the load, (max_demand: {str(max_demad)} & installed cap:{str(max_installed_caps)})"    
+    message = None if ok_flag else f"The installed capacities are not enough to cover the load, (Qmax: {round(max_demad,2)} MW & installed Capacities: {round(max_installed_caps,2)} MW)"    
     
     
     return pyomo_data,message

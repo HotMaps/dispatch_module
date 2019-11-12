@@ -47,6 +47,8 @@ def run(data,inv_flag):
     m.lt_j = pyo.Param(m.j)
     m.ir = pyo.Param()
     m.max_rad = pyo.Param()
+    m.em_j = pyo.Param(m.j)
+    m.pco2 = pyo.Param()
     #%% decision variables 
     m.x_th_jt = pyo.Var(m.j,m.t,within=pyo.NonNegativeReals)
     m.x_el_jt = pyo.Var(m.j,m.t,within=pyo.NonNegativeReals)
@@ -63,7 +65,7 @@ def run(data,inv_flag):
     m.gen_el_jt = pyo.Constraint(m.j,m.t,rule=gen_el_jt_rule)
 
     def capacity_restriction_max_j_rule (m,j):
-        #% ToDo: Define upper bound
+        #% ToDo: Define upper bound because when technologies can make revenues 
         if inv_flag:
             rule = m.Cap_j[j]  <= m.max_demad
         else:
