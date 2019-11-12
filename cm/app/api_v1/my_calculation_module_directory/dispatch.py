@@ -153,6 +153,7 @@ def run(data,inv_flag):
     instance.solutions.load_from(results)
     instance.solutions.store_to(results)
     print("*****************\ntime for solving: " + str(datetime.now()-solv_start)+"\n*****************")
+
     if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
         print ("*****************\nthis is feasible and optimal"+"\n*****************")
         return(instance,results),None
@@ -160,8 +161,8 @@ def run(data,inv_flag):
         print ("*****************\nthis is infeasible or unbounded"+"\n*****************")
         return (-1,-1),"this is infeasible or unbounded"
     else:
-        print ("*****************\n"+str(results.solver)+"\n*****************\n")
-        return (-1,-1),results.solver       
+        print ("*****************\n"+str(results.solver.termination_condition)+"\n*****************\n")
+        return (-1,-1),results.solver.message       
 if __name__ == "__main__":
     print('Main: Dispatch Module')
 #    from disptach import run

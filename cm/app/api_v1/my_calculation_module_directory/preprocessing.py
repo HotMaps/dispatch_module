@@ -10,7 +10,7 @@ import pandas as pd
 from .mydecorator import decore_message
 
 path2data = os.path.split(os.path.abspath(__file__))[0]
-init_data = os.path.join(path2data,"data.xlsx")
+#init_data = os.path.join(path2data,"data.xlsx")
 path_inputs_parameter = os.path.join(path2data,"INPUTS_CALCULATION_MODULE.xlsx")
 
 #%%

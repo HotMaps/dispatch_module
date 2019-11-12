@@ -1,24 +1,31 @@
-import pandas as pd
+import pandas as pd, numpy as np
 import os
+import pprint
 
 path2data = os.path.split(os.path.abspath(__file__))[0]
 path_inputs_parameter = os.path.join(path2data,"INPUTS_CALCULATION_MODULE.xlsx")
+path_inputs_output=os.path.join(path2data,"INPUTS_CALCULATION_MODULE.txt")
 
-
-def load_input_widgets(CM_ID,path=path_inputs_parameter):
-    df = pd.read_excel(path).astype(str)
-    df["cm_id"] = CM_ID
-    out = df.to_dict(orient='records')
+def load_input_widgets(CM_ID="CM_ID",path=path_inputs_parameter,outpath=path_inputs_output): 
+    df = pd.read_excel(path).replace(np.nan, '', regex=True).astype(str)
+    df["cm_id"] = CM_ID 
+    out = df.to_dict(orient='records') 
+     
+    for i,data in enumerate(out): 
+        if data["input_type"] == "select": 
+            out[i]["input_value"] = [x.strip() for x in data["input_value"].replace("[","").replace("]","").replace("'","").replace('"','').split(",")]   
+        
+    with open(outpath,"w") as fp:
+        pprint.pprint(out,fp)
+    #    return out
     
-    for i,data in enumerate(out):
-        if data["input_type"] == "select":
-            out[i]["input_value"]= data["input_value"].replace("[","").replace("]","").replace("'","").replace('"','').split(",")    
-    return out,None
-
+    with open(outpath,"r") as fp:
+        data = fp.read()
+    data=data.replace(f"'{CM_ID}'",f'{CM_ID}')
+    with open(outpath,"w") as fp:
+        fp.write(data)        
+    return data
 
 if __name__ == "__main__":
     print('Main: input_widgets.py')
-    x,_= load_input_widgets("XX")
-    import pprint
-    pp = pprint.PrettyPrinter(indent=4)
-    pp.pprint(x)
+    out = load_input_widgets()
