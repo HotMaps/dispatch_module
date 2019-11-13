@@ -107,7 +107,8 @@ def solution2json(instance,results,inv_flag):
     solution["Total Electricity Generation"] = round(sum(solution["Electricity Generation Mix"].values()),2) 
     solution["Total CO2 Emissions"] = round(sum(solution["CO2 Emissions"].values()),2)  
 
-    solution["units"] = units      
+    solution["units"] = units  
+    
     return solution,None
 if __name__ == "__main__":
     print('Main: SaveSolution Module')    
