@@ -107,13 +107,7 @@ def solution2json(instance,results,inv_flag):
     solution["Total Electricity Generation"] = round(sum(solution["Electricity Generation Mix"].values()),2) 
     solution["Total CO2 Emissions"] = round(sum(solution["CO2 Emissions"].values()),2)  
 
-    solution["units"] = units
-    
-    from pprint import pprint
-    with open(r"C:\Users\hasani\Desktop\solutions.txt","w") as f:
-        pprint(solution,f,depth=1)
-    with open(r"C:\Users\hasani\Desktop\solutions2.txt","w") as f:
-        pprint(solution,f,depth=2)        
+    solution["units"] = units      
     return solution,None
 if __name__ == "__main__":
     print('Main: SaveSolution Module')    

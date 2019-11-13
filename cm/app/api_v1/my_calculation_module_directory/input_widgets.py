@@ -2,7 +2,7 @@ import pandas as pd, numpy as np
 import os
 import pprint
 
-path2data = os.path.split(os.path.abspath(__file__))[0]
+path2data = os.path.join(os.path.split(os.path.abspath(__file__))[0],"input_data")
 path_inputs_parameter = os.path.join(path2data,"INPUTS_CALCULATION_MODULE.xlsx")
 path_inputs_output=os.path.join(path2data,"INPUTS_CALCULATION_MODULE.txt")
 

@@ -9,7 +9,7 @@ import os,sys,pickle
 import pandas as pd
 from .mydecorator import decore_message
 
-path2data = os.path.split(os.path.abspath(__file__))[0]
+path2data = os.path.join(os.path.split(os.path.abspath(__file__))[0],"input_data")
 #init_data = os.path.join(path2data,"data.xlsx")
 path_inputs_parameter = os.path.join(path2data,"INPUTS_CALCULATION_MODULE.xlsx")
 

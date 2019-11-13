@@ -5,7 +5,7 @@ from .mydecorator import decore_message
 import geopandas as gpd
 from shapely.geometry import Point
 
-path2data = os.path.split(os.path.abspath(__file__))[0]
+path2data = path2data = os.path.join(os.path.split(os.path.abspath(__file__))[0],"input_data")
 path_nuts_code = os.path.join(path2data,"data_nuts_id_number.csv")
 
 @decore_message
