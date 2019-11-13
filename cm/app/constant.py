@@ -579,5 +579,5 @@ SIGNATURE = {
     
     'inputs_calculation_module': INPUTS_CALCULATION_MODULE,
     
-    'authorized_scale' : ["NUTS 3", "NUTS 2","NUTS 1", "NUTS 0","Hectare"]
+    'authorized_scale' : ["NUTS 3", "NUTS 2","NUTS 1", "NUTS 0","Hectare","LAU 2"]
 }
