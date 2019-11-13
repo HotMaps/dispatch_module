@@ -3,6 +3,7 @@
 # C extensions
 *.so
 
+
 # Packages
 *.egg
 *.egg-info
@@ -50,3 +51,5 @@ venv
 /cm/gurobi_install/gurobi.lic
 
 \.spyproject/
+
+.vscode
