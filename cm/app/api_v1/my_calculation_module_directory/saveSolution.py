@@ -76,7 +76,6 @@ def solution2json(instance,results,inv_flag):
     solution["Marginal Costs"] = {j:[round(instance.mc_jt[j,t],2) for t in instance.t] for j in instance.j}        
     solution["CO2 Costs"]= {j:round(sum([(instance.em_j[j]*instance.pco2/instance.n_th_j[j]) * instance.x_th_jt[j,t]() for t in instance.t]),2) for j in instance.j}
     solution["CO2 Emissions"]= {j:round(sum([instance.em_j[j] / instance.n_th_j[j] * instance.x_th_jt[j,t]() for t in instance.t]),2) for j in instance.j}
-
     solution["Anual Total Costs (from optimization)"] = round(instance.cost(),2)
     _c_ramp_waste = {j:round(sum(instance.ramp_j_waste_t[j,t]() * instance.c_ramp_waste for t in instance.t),2) for j in instance.j_waste}
     _c_ramp_chp = {j: round(sum(instance.ramp_j_chp_t[j,t]() * instance.c_ramp_chp for t in instance.t),2) for j in instance.j_chp}
@@ -90,7 +89,6 @@ def solution2json(instance,results,inv_flag):
     if inv_flag:
             solution["Anual Investment Cost"] = {j:round((instance.Cap_j[j]() - instance.x_th_cap_j[j])  * instance.IK_j[j] * instance.alpha_j[j],2) for j in instance.j}
     solution["Anual Investment Cost (of existing power plants)"] = {j:round(instance.x_th_cap_j[j] * instance.IK_j[j] * instance.alpha_j[j],2) for j in instance.j}
-
     solution["Investment Cost (with existing power plants)"] = {j:round(instance.Cap_j[j]()  * instance.IK_j[j] * instance.alpha_j[j],2) for j in instance.j}
     solution["Total Operational Costs"] = round(sum(solution["Operational Cost"].values()),2)  
     solution["Total Investment Costs"] = round(sum(solution["Investment Cost (with existing power plants)"].values()),2)  
