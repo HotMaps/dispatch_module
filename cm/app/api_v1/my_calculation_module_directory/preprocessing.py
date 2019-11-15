@@ -158,7 +158,8 @@ def preprocessing(data,inv_flag):
     em_j = {mapper[j]:data["ef"][data["ec"][j]] for j in tec}
     pco2 = data["pCO2"]
     max_rad = max(radiation_t.values())
-    
+    ec_j  = {mapper[j]:data["ec"][j] for j in tec}
+
     tec =       ["Heat Pump","Solar Thermal Plant","Waste Inceneration Pant","CHP","Heat Boiler"]    
     j_hp =      ["Heat Pump"]
     j_st =      ["Solar Thermal Plant"]
@@ -170,12 +171,12 @@ def preprocessing(data,inv_flag):
     args = [tec, j_hp, j_st, j_waste, j_chp, j_bp, demand_th_t, max_demad, 
             radiation_t, OP_fix_j, n_el_j, electricity_price_t, mc_jt, n_th_j,
             x_th_cap_j,c_ramp_chp, c_ramp_waste, OP_var_j, temperature_t, thresh,
-            sale_electricity_price_t,all_heat_geneartors,IK_j,lt_j,ir,alpha_j,max_rad,em_j,pco2]
+            sale_electricity_price_t,all_heat_geneartors,IK_j,lt_j,ir,alpha_j,max_rad,em_j,pco2,ec_j]
     
     keys = ['j', 'j_hp', 'j_st', 'j_waste', 'j_chp', 'j_bp', 'demand_th_t', 'max_demad', 
             'radiation_t', 'OP_fix_j', 'n_el_j', 'electricity_price_t', 'mc_jt', 'n_th_j', 
             'x_th_cap_j', 'c_ramp_chp', 'c_ramp_waste', 'OP_var_j', 'temperature_t', 'thresh', 
-            'sale_electricity_price_t', 'all_heat_geneartors',"IK_j","lt_j","ir","alpha_j","max_rad","em_j","pco2"]
+            'sale_electricity_price_t', 'all_heat_geneartors',"IK_j","lt_j","ir","alpha_j","max_rad","em_j","pco2","ec_j"]
     
     val = dict(zip(keys,args))
     

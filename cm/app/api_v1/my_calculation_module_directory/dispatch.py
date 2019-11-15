@@ -49,6 +49,7 @@ def run(data,inv_flag):
     m.max_rad = pyo.Param()
     m.em_j = pyo.Param(m.j)
     m.pco2 = pyo.Param()
+    m.ec_j = pyo.Param(m.j)
     #%% decision variables 
     m.x_th_jt = pyo.Var(m.j,m.t,within=pyo.NonNegativeReals)
     m.x_el_jt = pyo.Var(m.j,m.t,within=pyo.NonNegativeReals)
@@ -115,7 +116,7 @@ def run(data,inv_flag):
             return m.ramp_j_waste_t[j,t] >= m.x_th_jt[j,t] - m.x_th_jt[j,t-1]
     m.ramping_j_waste_t = pyo.Constraint(m.j_waste,m.t,rule=ramp_j_waste_t_rule)
 
-#   Seting cap for chp generation
+#   Seting cap for chp generation because of electricity productiin
     def chp_geneartion_restriction4_jt_rule(m,j,t):
         rule = m.x_th_jt[j,t] <= m.demand_th_t[t] 
         return rule

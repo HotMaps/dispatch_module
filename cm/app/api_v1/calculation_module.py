@@ -81,14 +81,16 @@ def calculation(output_directory, inputs_raster_selection, inputs_parameter_sele
 				'Installed Capacities',
 				'LCOH',
 				'Investment Cost (with existing power plants)',
-				'Operational Cost',
+				'O&M Cost',
 				'Fuel Costs',
 				'CO2 Costs',
 				'Ramping Costs',
 				'CO2 Emissions',
 				'Thermal Generation Mix',
 				'Electricity Generation Mix',
-				'Revenue From Electricity']
+				'Revenue From Electricity',]
+#                'CO2 Emissions by Energy carrier',
+#				'Thermal Generation Mix by Energy carrier',]
         list_of_tuples = [ dict(type="bar",label=f"{x} ({solution['units'][x]})",key=x) for x in bar_graphs ]
         
         graphics = [ dict( xLabel="Technologies", 
@@ -109,7 +111,7 @@ def calculation(output_directory, inputs_raster_selection, inputs_parameter_sele
         				'Total Thermal Generation',
         				'Total Electricity Generation',
         				'Total Investment Costs',
-        				'Total Operational Costs',
+        				'Total O&M Costs',
         				'Total Fuel Costs',
         				'Total CO2 Costs',
         				'Total Ramping Costs',
