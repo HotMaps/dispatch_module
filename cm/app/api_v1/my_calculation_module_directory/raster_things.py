@@ -4,9 +4,23 @@ import numpy as np, pandas as pd
 from .mydecorator import decore_message
 import geopandas as gpd
 from shapely.geometry import Point
+import pickle
 
 path2data = path2data = os.path.join(os.path.split(os.path.abspath(__file__))[0],"input_data")
 path_nuts_code = os.path.join(path2data,"data_nuts_id_number.csv")
+
+@decore_message
+def load_profile(nuts0,profile_name="radiation_profiles.dat"):
+    with open(os.path.join(path2data,profile_name),"rb") as file:
+        dat = pickle.load(file)
+        try:
+            val = dat[(nuts0, '2008-2016')]
+        except:
+            print("#"*100)
+            print("Warning use AT as profile")
+            print("#"*100)
+            val = dat[("AT", '2008-2016')] 
+    return val,None
 
 @decore_message
 def get_nuts(nuts_code):
@@ -44,17 +58,25 @@ def return_nuts_codes(path_to_raster):
 
 
 @decore_message
-def get_temperature_and_radiation(point,target_epsg=4326,init_epsg=3035):
+def get_temperature_and_radiation(point,nuts0,target_epsg=4326,init_epsg=3035):
     os.environ['PROJ_LIB']  = os.path.join(os.path.dirname(sys.executable),"Library","share")
     p = gpd.GeoDataFrame([[Point(point)]], geometry='geometry', crs={'init': f'epsg:{init_epsg}'}, columns=['geometry'])   
     p = p.to_crs(epsg=target_epsg)
     lon = float(p.geometry.x)
     lat = float(p.geometry.y)
 #    https://re.jrc.ec.europa.eu/pvg_static/web_service.html#HR
-    req = f"https://re.jrc.ec.europa.eu/pvgis5/tmy.php?lat={lat}&lon={lon}"
-    df = pd.read_csv(req,sep=",")
-    radiation = dict(zip(range(1,8760+1),df[" Ghor"].values.tolist()))
-    temperature = dict(zip(range(1,8760+1),df["Tair"].values.tolist())) 
+    try:
+        req = f"https://re.jrc.ec.europa.eu/pvgis5/tmy.php?lat={lat}&lon={lon}"
+        df = pd.read_csv(req,sep=",")
+        rad = df[" Ghor"].values.tolist()
+        temp = df["Tair"].values.tolist()
+    except:
+        print("Server https://re.jrc.ec.europa.eu/ not working using local data")
+        rad,_ = load_profile(nuts0,"radiation_profiles.dat").values.tolist()
+        temp,_ = load_profile(nuts0,"temperature_profiles.dat").values.tolist()
+
+    radiation = dict(zip(range(1,8760+1),rad))
+    temperature = dict(zip(range(1,8760+1),temp))
     out = dict(temperature_t=temperature,radiation_t=radiation)
     return out,None
 

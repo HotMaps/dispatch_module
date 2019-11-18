@@ -28,7 +28,7 @@ def calculation(output_directory, inputs_raster_selection, inputs_parameter_sele
     
     p,message = get_max_heat_point(inputs_raster_selection["heat"])
     if p != -1:
-        temperature_radiation,message = get_temperature_and_radiation(p)
+        temperature_radiation,message = get_temperature_and_radiation(p,nuts0)
     else:
         temperature_radiation= -1
     
@@ -88,9 +88,11 @@ def calculation(output_directory, inputs_raster_selection, inputs_parameter_sele
 				'CO2 Emissions',
 				'Thermal Generation Mix',
 				'Electricity Generation Mix',
-				'Revenue From Electricity',]
-#                'CO2 Emissions by Energy carrier',
-#				'Thermal Generation Mix by Energy carrier',]
+				'Revenue From Electricity',
+                "Fuel Demand",
+                'CO2 Emissions by Energy carrier',
+				'Thermal Generation Mix by Energy carrier',
+                'Final Energy Demand by Energy carrier']
         list_of_tuples = [ dict(type="bar",label=f"{x} ({solution['units'][x]})",key=x) for x in bar_graphs ]
         
         graphics = [ dict( xLabel="Technologies", 
@@ -115,9 +117,11 @@ def calculation(output_directory, inputs_raster_selection, inputs_parameter_sele
         				'Total Fuel Costs',
         				'Total CO2 Costs',
         				'Total Ramping Costs',
-        				'Total CO2 Emissions']
+        				'Total CO2 Emissions',
+                        "Total Heat Demand"]
         
         indicators = [{"unit":solution["units"][key], "name":key,"value":solution[key]} for key in indicator_list]
+        indicators.append(dict(unit="-",name=f"Data from folowing  NUTS-levels are used: {set((nuts0,nuts2))}",value=0))
         result['indicator'] = indicators
         result['graphics'] = graphics
         result['vector_layers'] = []

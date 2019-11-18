@@ -12,8 +12,8 @@ def add_energy_carrier_key(key,solution,instance):
     key_new = f"{key} by Energy carrier"
     solution[key_new] = dict()
     for j in instance.j:
-        solution[key_new][instance.ec_j[j]] = solution[key_new].get(instance.ec_j[j],0) + solution[key][j] 
-            
+        solution[key_new][instance.ec_j[j]] = solution[key_new].get(instance.ec_j[j],0) + solution[key][j]
+    solution[key_new] = {i:round(v,2) for i,v in solution[key_new].items()}       
 @decore_message
 def solution2json(instance,results,inv_flag):
 # =============================================================================
@@ -60,8 +60,10 @@ def solution2json(instance,results,inv_flag):
     units["Electricity Generation Mix"] = "MWh/yr"
     units["Total Electricity Generation"] = "MWh/yr"
     units["Total Ramping Costs"] = "EUR/yr"
-    units['CO2 Emissions by Energy carrier'] = "t"
-    units['Thermal Generation Mix by Energy carrier'] ="MWh"
+    units['CO2 Emissions by Energy carrier'] = "t/yr"
+    units['Thermal Generation Mix by Energy carrier'] ="MWh/yr"
+    units["Fuel Demand"] = "MWh/yr",
+    units['Final Energy Demand by Energy carrier'] = "MWh/yr"
 # =============================================================================
 #   Define outputs
 # =============================================================================
@@ -115,9 +117,17 @@ def solution2json(instance,results,inv_flag):
     for key in ["Thermal Generation Mix","CO2 Emissions"]:
         add_energy_carrier_key(key,solution,instance)
     
+    solution["Fuel Demand"] = {j:round(solution["Thermal Generation Mix"][j] / instance.n_th_j[j],2) for j in instance.j}
+
+    key = "Thermal Generation Mix"
+    key_new = 'Final Energy Demand by Energy carrier'
+    solution[key_new] = dict()
+    for j in instance.j:
+        solution[key_new][instance.ec_j[j]] = solution[key_new].get(instance.ec_j[j],0) + solution[key][j] / instance.n_th_j[j]
+    solution[key_new] = {i:round(v,2) for i,v in solution[key_new].items()}
     
-    solution["units"] = units  
     
+    solution["units"] = units
     return solution,None
 if __name__ == "__main__":
     print('Main: SaveSolution Module')    
