@@ -62,8 +62,9 @@ def solution2json(instance,results,inv_flag):
     units["Total Ramping Costs"] = "EUR/yr"
     units['CO2 Emissions by Energy carrier'] = "t/yr"
     units['Thermal Generation Mix by Energy carrier'] ="MWh/yr"
-    units["Fuel Demand"] = "MWh/yr",
+    units["Fuel Demand"] = "MWh/yr"
     units['Final Energy Demand by Energy carrier'] = "MWh/yr"
+    units["Total Final Energy Demand"] = "MWh/yr"
 # =============================================================================
 #   Define outputs
 # =============================================================================
@@ -126,6 +127,7 @@ def solution2json(instance,results,inv_flag):
         solution[key_new][instance.ec_j[j]] = solution[key_new].get(instance.ec_j[j],0) + solution[key][j] / instance.n_th_j[j]
     solution[key_new] = {i:round(v,2) for i,v in solution[key_new].items()}
     
+    solution["Total Final Energy Demand"] = round(sum(solution["Final Energy Demand by Energy carrier"].values()),2) 
     
     solution["units"] = units
     return solution,None

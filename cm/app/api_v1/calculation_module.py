@@ -118,10 +118,10 @@ def calculation(output_directory, inputs_raster_selection, inputs_parameter_sele
         				'Total CO2 Costs',
         				'Total Ramping Costs',
         				'Total CO2 Emissions',
-                        "Total Heat Demand"]
+                        "Total Heat Demand","Total Final Energy Demand"]
         
         indicators = [{"unit":solution["units"][key], "name":key,"value":solution[key]} for key in indicator_list]
-        indicators.append(dict(unit="-",name=f"Data from folowing  NUTS-levels are used: {set((nuts0,nuts2))}",value=0))
+        indicators.append(dict(unit="-",name=f"Heat load profile and electricity price profile from folowing  NUTS-level used: {set((nuts0,nuts2))}",value=0))
         result['indicator'] = indicators
         result['graphics'] = graphics
         result['vector_layers'] = []
