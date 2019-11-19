@@ -4,9 +4,37 @@ Created on Wed Dec  5 18:16:18 2018
 
 @author: root
 """
-import numpy as np
-
 from .mydecorator import decore_message
+import numpy as np
+from engineering_notation import EngNumber
+def isfloat(value):
+    try:
+        float(value)
+        return True
+    except ValueError:
+        return False
+
+def fromEngNumber(num):
+    _suffix_lookup_table = {
+        'p': 1e-12,
+        'n': 1e-9,
+        'u': 1e-6,
+        'm': 1e-3,
+        '': 1e0,
+        'k': 1e3,
+        'M': 1e6,
+        'G': 1e9,
+        'T': 1e12}
+     
+    eng_num=str(EngNumber(num))
+    if isfloat(eng_num):
+        value = float(eng_num)
+        suffix = ""
+    else:
+        value = float(eng_num[:-1])            
+        suffix = eng_num[-1]
+    scale = _suffix_lookup_table[suffix]            
+    return value,suffix,scale
 
 def add_energy_carrier_key(key,solution,instance):
     key_new = f"{key} by Energy carrier"
@@ -108,7 +136,7 @@ def solution2json(instance,results,inv_flag):
     solution["Total Revenue From Electricity"] = round(sum(solution["Revenue From Electricity"].values()),2)  
     solution["Total Fuel Costs"] = round(sum(solution["Fuel Costs"].values()),2)  
     solution["Total CO2 Costs"] = round(sum(solution["CO2 Costs"].values()),2)     
-    solution["LCOH"] =  {j:round((solution["Investment Cost (with existing power plants)"][j]+solution["O&M Cost"][j]+solution["Fuel Costs"][j] + solution["CO2 Costs"][j] + solution["Ramping Costs"][j] -solution["Revenue From Electricity"][j])/solution["Thermal Generation Mix"][j],2) if solution["Thermal Generation Mix"][j]>0 else "" for j in instance.j  }  
+    solution["LCOH"] =  {j:round((solution["Investment Cost (with existing power plants)"][j]+solution["O&M Cost"][j]+solution["Fuel Costs"][j] + solution["CO2 Costs"][j] + solution["Ramping Costs"][j] -solution["Revenue From Electricity"][j])/solution["Thermal Generation Mix"][j],2) if solution["Thermal Generation Mix"][j]>0 else 0 for j in instance.j  }  
     solution["Total Ramping Costs"] = round(sum(solution["Ramping Costs"].values()),2) 
     solution["Anual Total Costs"] = round(solution["Total Investment Costs"] + solution["Total O&M Costs"] + solution["Total Fuel Costs"] + solution["Total CO2 Costs"]+solution["Total Ramping Costs"],2)
     solution["Total LCOH"] = round((solution["Anual Total Costs"]- solution["Total Revenue From Electricity"]) / solution["Total Thermal Generation"],2)
@@ -128,7 +156,35 @@ def solution2json(instance,results,inv_flag):
     solution[key_new] = {i:round(v,2) for i,v in solution[key_new].items()}
     
     solution["Total Final Energy Demand"] = round(sum(solution["Final Energy Demand by Energy carrier"].values()),2) 
+    #%%
+#    import pickle
+#    pickle.dump([solution,units],open(r"C:\Users\hasani\Desktop\test.dat","wb"))
+    #%%
+#    import pickle
+#    import numpy as np
+#    solution,units = pickle.load(open(r"C:\Users\hasani\Desktop\test.dat","rb"))
+#    from engineering_notation import EngNumber 
     
+    for key,val in solution.items():
+        if key == "Technologies":
+            continue
+        if type(val) == dict or type(val) == list:
+            num=float(np.percentile(np.asarray(list(val.values()) if type(val) == dict else val).astype(float),90))
+            value,suffix,scale =  fromEngNumber(num)
+            units[key] = f"{suffix} {units[key]}"
+            if type(val) == dict: 
+                for key2,val2 in val.items():
+                    if type(val2) == list:
+                        solution[key][key2] = (np.asarray(val2)/scale).round(2).tolist()
+                    else:
+                        solution[key][key2] = round(val2/scale,2)
+            else:
+                solution[key] = (np.asarray(val)/scale).round(2).tolist()
+        else:
+            value,suffix,scale =  fromEngNumber(val)
+            solution[key] = value
+            units[key] = f"{suffix} {units[key]}"
+#%%    
     solution["units"] = units
     return solution,None
 if __name__ == "__main__":

@@ -5,6 +5,7 @@ from .mydecorator import decore_message
 import geopandas as gpd
 from shapely.geometry import Point
 import pickle
+import numpy as np
 
 path2data = path2data = os.path.join(os.path.split(os.path.abspath(__file__))[0],"input_data")
 path_nuts_code = os.path.join(path2data,"data_nuts_id_number.csv")
@@ -14,12 +15,12 @@ def load_profile(nuts0,profile_name="radiation_profiles.dat"):
     with open(os.path.join(path2data,profile_name),"rb") as file:
         dat = pickle.load(file)
         try:
-            val = dat[(nuts0, '2008-2016')]
+            val = dat[(nuts0, '2008-2016')].tolist()
         except:
             print("#"*100)
             print("Warning use AT as profile")
             print("#"*100)
-            val = dat[("AT", '2008-2016')] 
+            val = dat[("AT", '2008-2016')].tolist() 
     return val,None
 
 @decore_message
@@ -71,9 +72,11 @@ def get_temperature_and_radiation(point,nuts0,target_epsg=4326,init_epsg=3035):
         rad = df[" Ghor"].values.tolist()
         temp = df["Tair"].values.tolist()
     except:
+        print("#"*100)
         print("Server https://re.jrc.ec.europa.eu/ not working using local data")
-        rad,_ = load_profile(nuts0,"radiation_profiles.dat").values.tolist()
-        temp,_ = load_profile(nuts0,"temperature_profiles.dat").values.tolist()
+        print("#"*100)
+        rad,_ = load_profile(nuts0,"radiation_profiles.dat")
+        temp,_ = load_profile(nuts0,"temperature_profiles.dat")
 
     radiation = dict(zip(range(1,8760+1),rad))
     temperature = dict(zip(range(1,8760+1),temp))
