@@ -18,7 +18,7 @@ def add_jt_electricity_profiles(input_string,dictionary,inputs_parameter_selecti
     j,_x=input_string.split("_")
     key = _x.split("Select")[0]
     if inputs_parameter_selection[input_string] == "fix":
-        return dict(zip(zip([j]*8760,range(1,8760+1)),[inputs_parameter_selection[f"{j}_{key}"]]*8760))
+        return dict(zip(zip([j]*8760,range(1,8760+1)),[float(inputs_parameter_selection[f"{j}_{key}"])]*8760))
     else:
         return dict(zip(zip([j]*8760,range(1,8760+1)),return_dict("price_profiles",(nuts[0],2015))[0].values()))
         
