@@ -31,7 +31,6 @@ def run(data,inv_flag):
     m.radiation_t = pyo.Param(m.t)
     m.OP_fix_j = pyo.Param(m.j)
     m.n_el_j = pyo.Param(m.j)
-    m.electricity_price_jt = pyo.Param(m.j,m.t)
     m.mc_jt = pyo.Param(m.j,m.t)
     m.n_th_j = pyo.Param(m.j)
     m.x_th_cap_j = pyo.Param(m.j)
@@ -40,8 +39,8 @@ def run(data,inv_flag):
     m.OP_var_j = pyo.Param(m.j)
     m.temperature_t = pyo.Param(m.t)
     m.thresh =  pyo.Param()
-    m.sale_electricity_price_t = pyo.Param(m.t)
-    m.electricity_price_t = pyo.Param(m.t)
+    m.sale_electricity_price_jt = pyo.Param(m.j,m.t)
+    m.electricity_price_jt = pyo.Param(m.j,m.t)
     m.IK_j = pyo.Param(m.j)
     m.alpha_j = pyo.Param(m.j)
     m.lt_j = pyo.Param(m.j)
@@ -138,7 +137,7 @@ def run(data,inv_flag):
         c_var= sum([m.mc_jt[j,t] * m.x_th_jt[j,t] for j in m.j for t in m.t])
         c_ramp = sum ([m.ramp_j_waste_t[j,t] * m.c_ramp_waste for j in m.j_waste for t in m.t]) + sum ([m.ramp_j_chp_t[j,t] * m.c_ramp_chp for j in m.j_chp for t in m.t])
         c_tot = c_inv + c_var + c_op_fix + c_op_var + c_ramp 
-        rev_gen_electricity = sum([m.x_el_jt[j,t]*(m.sale_electricity_price_t[t]) for j in m.j for t in m.t])
+        rev_gen_electricity = sum([m.x_el_jt[j,t]*(m.sale_electricity_price_jt[j,t]) for j in m.j for t in m.t])
         rule = c_tot - rev_gen_electricity
         return rule
     m.cost = pyo.Objective(rule=cost_rule)

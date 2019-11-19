@@ -14,6 +14,14 @@ path2data = os.path.join(os.path.split(os.path.abspath(__file__))[0],"input_data
 path_inputs_parameter = os.path.join(path2data,"INPUTS_CALCULATION_MODULE.xlsx")
 
 #%%
+def add_jt_electricity_profiles(input_string,dictionary,inputs_parameter_selection,nuts):
+    j,_x=input_string.split("_")
+    key = _x.split("Select")[0]
+    if inputs_parameter_selection[input_string] == "fix":
+        return dict(zip(zip([j]*8760,range(1,8760+1)),[inputs_parameter_selection[f"{j}_{key}"]]*8760))
+    else:
+        return dict(zip(zip([j]*8760,range(1,8760+1)),return_dict("price_profiles",(nuts[0],2015))[0].values()))
+        
 @decore_message
 def get_user_input(inputs_parameter_selection,nuts,path=path_inputs_parameter):
     df = pd.read_excel(path)
@@ -28,11 +36,34 @@ def get_user_input(inputs_parameter_selection,nuts,path=path_inputs_parameter):
             out[key] = {**out.get(key,{}),**{tec:inputs_parameter_selection[val]}}
     for k in ["pCO2","ir","if"]:
         out = {**out,**out.pop(k)}
-    list_of_tuples = [(("electricity_price_t","price_profiles"),(nuts[0],2015)),
-                      (("sale_electricity_price_t","price_profiles"),(nuts[0],2015)),
-                      (("demand_th_t","load_profiles"),(nuts[2],2010)),
-                      ]
+    list_of_tuples = [(("demand_th_t","load_profiles"),(nuts[2],2010))]
     out,message = load_init_profiles(out,list_of_tuples) #TODO: adapt to selcted region
+
+    
+    electricity_price_jt =           []
+    sale_electricity_price_jt =      []
+    test = {0:electricity_price_jt,1:sale_electricity_price_jt}
+
+    for input_string,i  in [
+            ("wi_elpSelect",0),
+            ("chp_elpSelect",0),
+            ("hp_elpSelect",0),
+            ("st_elpSelect",0),
+            ("hb_elpSelect",0),
+            ("wi_selpSelect",1),
+            ("chp_selpSelect",1),   
+            ("hp_selpSelect",1),
+            ("st_selpSelect",1),    
+            ("hb_selpSelect",1)]:
+        test[i].append(add_jt_electricity_profiles(input_string,test[i],inputs_parameter_selection,nuts))
+    
+
+    electricity_price_jt = {k: v for d in electricity_price_jt for k, v in d.items()}
+    sale_electricity_price_jt = {k: v for d in sale_electricity_price_jt for k, v in d.items()}
+    
+    out["electricity_price_jt"] = electricity_price_jt
+    out["sale_electricity_price_jt"] = sale_electricity_price_jt
+
     return out,message
 #%%
 @decore_message
@@ -103,8 +134,8 @@ def preprocessing(data,inv_flag):
         ok_flag = False
     
     radiation_t =                   data["radiation_t"]
-    electricity_price_t =           data["electricity_price_t"]
-    sale_electricity_price_t =      data["sale_electricity_price_t"]
+    electricity_price_jt = data["electricity_price_jt"]
+    sale_electricity_price_jt = data["sale_electricity_price_jt"]
     temperature_t =                 data["temperature_t"]
     
     
@@ -120,7 +151,7 @@ def preprocessing(data,inv_flag):
         else:
             if data["ec"][j] == "electricity":
                 for t in range(1,8760+1):
-                    mc[j,t]= electricity_price_t[t] / data["nth"][j] + \
+                    mc[j,t]= electricity_price_jt[j,t] / data["nth"][j] + \
                                  data["ef"][data["ec"][j]]*data["pCO2"] / \
                                   data["nth"][j]
             else:
@@ -167,18 +198,23 @@ def preprocessing(data,inv_flag):
     j_chp =     ["CHP"]
     j_bp =      ["Heat Boiler"]
 
-
+    electricity_price_jt =           {(mapper[key[0]],key[1]):val for key,val in electricity_price_jt.items()}
+    sale_electricity_price_jt =      {(mapper[key[0]],key[1]):val for key,val in sale_electricity_price_jt.items()}
+    
     args = [tec, j_hp, j_st, j_waste, j_chp, j_bp, demand_th_t, max_demad, 
-            radiation_t, OP_fix_j, n_el_j, electricity_price_t, mc_jt, n_th_j,
+            radiation_t, OP_fix_j, n_el_j, electricity_price_jt, mc_jt, n_th_j,
             x_th_cap_j,c_ramp_chp, c_ramp_waste, OP_var_j, temperature_t, thresh,
-            sale_electricity_price_t,all_heat_geneartors,IK_j,lt_j,ir,alpha_j,max_rad,em_j,pco2,ec_j]
+            sale_electricity_price_jt,all_heat_geneartors,IK_j,lt_j,ir,alpha_j,max_rad,em_j,pco2,ec_j]
     
     keys = ['j', 'j_hp', 'j_st', 'j_waste', 'j_chp', 'j_bp', 'demand_th_t', 'max_demad', 
-            'radiation_t', 'OP_fix_j', 'n_el_j', 'electricity_price_t', 'mc_jt', 'n_th_j', 
+            'radiation_t', 'OP_fix_j', 'n_el_j', 'electricity_price_jt', 'mc_jt', 'n_th_j', 
             'x_th_cap_j', 'c_ramp_chp', 'c_ramp_waste', 'OP_var_j', 'temperature_t', 'thresh', 
-            'sale_electricity_price_t', 'all_heat_geneartors',"IK_j","lt_j","ir","alpha_j","max_rad","em_j","pco2","ec_j"]
+            'sale_electricity_price_jt', 'all_heat_geneartors',"IK_j","lt_j","ir","alpha_j","max_rad","em_j","pco2","ec_j"]
     
     val = dict(zip(keys,args))
+
+#    import pprint
+#    pprint.pprint(val,stream=open(r"C:\Users\hasani\Desktop\data.txt","w"))  
     
     #% reshape data to fit the pyomo data structure for abstract models
     pyomo_data = {}
