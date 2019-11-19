@@ -39,12 +39,14 @@ def fromEngNumber(num):
     return value,suffix,scale
 
 def adapt_units(string):
+    string = string.replace("T M","E")
+    string = string.replace("G M","P")
     string = string.replace("M M","T")
     string = string.replace("k M","G")
-    string = string.replace("p M","u")
-    string = string.replace("n M","m")    
-    string = string.replace("u M","M")
     string = string.replace("m M","k")
+    string = string.replace("n M","m")  
+    string = string.replace("u M","")
+    string = string.replace("p M","u")
     return string
             
 def add_energy_carrier_key(key,solution,instance):
