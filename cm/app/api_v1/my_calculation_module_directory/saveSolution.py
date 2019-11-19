@@ -25,8 +25,10 @@ def fromEngNumber(num):
         'M': 1e6,
         'G': 1e9,
         'T': 1e12}
-     
-    eng_num=str(EngNumber(num))
+    try:
+        eng_num=str(EngNumber(num))
+    except:
+        eng_num = str(num)
     if isfloat(eng_num):
         value = float(eng_num)
         suffix = ""
@@ -36,12 +38,21 @@ def fromEngNumber(num):
     scale = _suffix_lookup_table[suffix]            
     return value,suffix,scale
 
+def adapt_units(string):
+    string = string.replace("M M","T")
+    string = string.replace("k M","G")
+    string = string.replace("p M","u")
+    string = string.replace("n M","m")    
+    string = string.replace("u M","M")
+    string = string.replace("m M","k")
+    return string
+            
 def add_energy_carrier_key(key,solution,instance):
     key_new = f"{key} by Energy carrier"
     solution[key_new] = dict()
     for j in instance.j:
         solution[key_new][instance.ec_j[j]] = solution[key_new].get(instance.ec_j[j],0) + solution[key][j]
-    solution[key_new] = {i:round(v,2) for i,v in solution[key_new].items()}       
+    solution[key_new] = {i:v for i,v in solution[key_new].items()}       
 @decore_message
 def solution2json(instance,results,inv_flag):
 # =============================================================================
@@ -97,65 +108,65 @@ def solution2json(instance,results,inv_flag):
 #   Define outputs
 # =============================================================================
     solution = {}    
-    solution["Thermal Power Energymix"]={j:[round(instance.x_th_jt[(j,t)](),2) for t in instance.t] for j in instance.j}
-    solution["Installed Capacities"]= {j:round(instance.Cap_j[j](),2) for j in instance.j}
-    solution["Heat Price"]= [round(results.solution(0).constraint["genearation_covers_demand_t["+str(t)+"]"]["Dual"],2) for t in instance.t]
-    solution["Electricity Production by CHP"]= round(sum([instance.x_el_jt[(j,t)]() for j in instance.j_chp for t in instance.t]),2)
-    solution["Electricity Generation Mix"]= {j:round(sum([instance.x_el_jt[(j,t)]() for t in instance.t]),2) for j in instance.j}
-    solution["Thermal Production by CHP"]= round(sum([instance.x_th_jt[(j,t)]() for j in instance.j_chp for t in instance.t]),2)
-    solution["Thermal Generation Mix"]= {j:round(sum([instance.x_th_jt[(j,t)]() for t in instance.t]),2) for j in instance.j}
-    solution["Revenue From Electricity"] = {j:round(sum(instance.x_el_jt[j,t]()*instance.sale_electricity_price_t[t] for t in instance.t),2) for j in instance.j}
-    solution["Heat Demand"] = [round(instance.demand_th_t[t],2) for t in instance.t]
-    solution["Electricity Price"] = [round(instance.electricity_price_t[t],2) for t in instance.t]
-    solution["Mean Value Heat Price"] = round(np.mean(np.array(solution["Heat Price"])),2)
-    solution["Median Value Heat Price"] = round(np.median(np.array(solution["Heat Price"])),2)
-    solution["O&M Cost"]= {j:round((instance.Cap_j[j]() * instance.OP_fix_j[j] + sum(instance.x_th_jt[j,t]() * instance.OP_var_j[j]for t in instance.t)),2)for j in instance.j}
-    solution["Variable Cost CHP's"]= round(sum([instance.mc_jt[j,t] * instance.x_th_jt[j,t]() - instance.sale_electricity_price_t[t] * instance.x_el_jt[j,t]() for j in instance.j_chp for t in instance.t]),2)
-    solution["Fuel Costs"] = {j:round(sum([(instance.mc_jt[j,t]-instance.em_j[j]*instance.pco2/instance.n_th_j[j]) * instance.x_th_jt[j,t]() for t in instance.t]),2) for j in instance.j}  
-    solution["Marginal Costs"] = {j:[round(instance.mc_jt[j,t],2) for t in instance.t] for j in instance.j}        
-    solution["CO2 Costs"]= {j:round(sum([(instance.em_j[j]*instance.pco2/instance.n_th_j[j]) * instance.x_th_jt[j,t]() for t in instance.t]),2) for j in instance.j}
-    solution["CO2 Emissions"]= {j:round(sum([instance.em_j[j] / instance.n_th_j[j] * instance.x_th_jt[j,t]() for t in instance.t]),2) for j in instance.j}
-    solution["Anual Total Costs (from optimization)"] = round(instance.cost(),2)
-    _c_ramp_waste = {j:round(sum(instance.ramp_j_waste_t[j,t]() * instance.c_ramp_waste for t in instance.t),2) for j in instance.j_waste}
-    _c_ramp_chp = {j: round(sum(instance.ramp_j_chp_t[j,t]() * instance.c_ramp_chp for t in instance.t),2) for j in instance.j_chp}
+    solution["Thermal Power Energymix"]={j:[instance.x_th_jt[(j,t)]() for t in instance.t] for j in instance.j}
+    solution["Installed Capacities"]= {j:instance.Cap_j[j]() for j in instance.j}
+    solution["Heat Price"]= [results.solution(0).constraint["genearation_covers_demand_t["+str(t)+"]"]["Dual"] for t in instance.t]
+    solution["Electricity Production by CHP"]= sum([instance.x_el_jt[(j,t)]() for j in instance.j_chp for t in instance.t])
+    solution["Electricity Generation Mix"]= {j:sum([instance.x_el_jt[(j,t)]() for t in instance.t]) for j in instance.j}
+    solution["Thermal Production by CHP"]= sum([instance.x_th_jt[(j,t)]() for j in instance.j_chp for t in instance.t])
+    solution["Thermal Generation Mix"]= {j:sum([instance.x_th_jt[(j,t)]() for t in instance.t]) for j in instance.j}
+    solution["Revenue From Electricity"] = {j:sum(instance.x_el_jt[j,t]()*instance.sale_electricity_price_t[t] for t in instance.t) for j in instance.j}
+    solution["Heat Demand"] = [instance.demand_th_t[t] for t in instance.t]
+    solution["Electricity Price"] = [instance.electricity_price_t[t] for t in instance.t]
+    solution["Mean Value Heat Price"] = np.mean(np.array(solution["Heat Price"]))
+    solution["Median Value Heat Price"] = np.median(np.array(solution["Heat Price"]))
+    solution["O&M Cost"]= {j:(instance.Cap_j[j]() * instance.OP_fix_j[j] + sum(instance.x_th_jt[j,t]() * instance.OP_var_j[j]for t in instance.t))for j in instance.j}
+    solution["Variable Cost CHP's"]= sum([instance.mc_jt[j,t] * instance.x_th_jt[j,t]() - instance.sale_electricity_price_t[t] * instance.x_el_jt[j,t]() for j in instance.j_chp for t in instance.t])
+    solution["Fuel Costs"] = {j:sum([(instance.mc_jt[j,t]-instance.em_j[j]*instance.pco2/instance.n_th_j[j]) * instance.x_th_jt[j,t]() for t in instance.t]) for j in instance.j}  
+    solution["Marginal Costs"] = {j:[instance.mc_jt[j,t] for t in instance.t] for j in instance.j}        
+    solution["CO2 Costs"]= {j:sum([(instance.em_j[j]*instance.pco2/instance.n_th_j[j]) * instance.x_th_jt[j,t]() for t in instance.t]) for j in instance.j}
+    solution["CO2 Emissions"]= {j:sum([instance.em_j[j] / instance.n_th_j[j] * instance.x_th_jt[j,t]() for t in instance.t]) for j in instance.j}
+    solution["Anual Total Costs (from optimization)"] = instance.cost()
+    _c_ramp_waste = {j:sum(instance.ramp_j_waste_t[j,t]() * instance.c_ramp_waste for t in instance.t) for j in instance.j_waste}
+    _c_ramp_chp = {j: sum(instance.ramp_j_chp_t[j,t]() * instance.c_ramp_chp for t in instance.t) for j in instance.j_chp}
     solution["Ramping Costs"] = { **{j:0 for j in instance.j},**_c_ramp_waste, **_c_ramp_chp}
     solution["Technologies"] = [j for j in instance.j]
     solution["Marginal Costs CHP"] = [np.mean([instance.mc_jt[j,t] for t in instance.t]) - instance.n_el_j[j]/instance.n_th_j[j] *np.mean([instance.sale_electricity_price_t[t] for t in instance.t]) if j in instance.j_chp else np.mean([instance.mc_jt[j,t] for t in instance.t]) for j in instance.j]
     for i,val in enumerate(instance.j):
         if val in instance.j_chp:
             solution["Marginal Costs CHP"][i] = solution["Marginal Costs CHP"][i] - instance.n_el_j[val]/instance.n_th_j[val]*np.mean([instance.sale_electricity_price_t[t] for t in instance.t])   
-    solution["Full Load Hours"] = {j:round(solution["Thermal Generation Mix"][j]/solution["Installed Capacities"][j],2) if solution["Installed Capacities"][j]!=0 else 0 for j in instance.j}
+    solution["Full Load Hours"] = {j:solution["Thermal Generation Mix"][j]/solution["Installed Capacities"][j] if solution["Installed Capacities"][j]!=0 else 0 for j in instance.j}
     if inv_flag:
-            solution["Anual Investment Cost"] = {j:round((instance.Cap_j[j]() - instance.x_th_cap_j[j])  * instance.IK_j[j] * instance.alpha_j[j],2) for j in instance.j}
-    solution["Anual Investment Cost (of existing power plants)"] = {j:round(instance.x_th_cap_j[j] * instance.IK_j[j] * instance.alpha_j[j],2) for j in instance.j}
-    solution["Investment Cost (with existing power plants)"] = {j:round(instance.Cap_j[j]()  * instance.IK_j[j] * instance.alpha_j[j],2) for j in instance.j}
-    solution["Total O&M Costs"] = round(sum(solution["O&M Cost"].values()),2)  
-    solution["Total Investment Costs"] = round(sum(solution["Investment Cost (with existing power plants)"].values()),2)  
-    solution["Total Thermal Generation"] = round(sum(solution["Thermal Generation Mix"].values()),2)  
+            solution["Anual Investment Cost"] = {j:(instance.Cap_j[j]() - instance.x_th_cap_j[j])  * instance.IK_j[j] * instance.alpha_j[j] for j in instance.j}
+    solution["Anual Investment Cost (of existing power plants)"] = {j:instance.x_th_cap_j[j] * instance.IK_j[j] * instance.alpha_j[j] for j in instance.j}
+    solution["Investment Cost (with existing power plants)"] = {j:instance.Cap_j[j]()  * instance.IK_j[j] * instance.alpha_j[j] for j in instance.j}
+    solution["Total O&M Costs"] = sum(solution["O&M Cost"].values())  
+    solution["Total Investment Costs"] = sum(solution["Investment Cost (with existing power plants)"].values())  
+    solution["Total Thermal Generation"] = sum(solution["Thermal Generation Mix"].values())  
 #    solution["Total Electricty Consumption"] = solution["Electrical Consumption of Heatpumps and Power to Heat devices"]  
-    solution["Total Revenue From Electricity"] = round(sum(solution["Revenue From Electricity"].values()),2)  
-    solution["Total Fuel Costs"] = round(sum(solution["Fuel Costs"].values()),2)  
-    solution["Total CO2 Costs"] = round(sum(solution["CO2 Costs"].values()),2)     
-    solution["LCOH"] =  {j:round((solution["Investment Cost (with existing power plants)"][j]+solution["O&M Cost"][j]+solution["Fuel Costs"][j] + solution["CO2 Costs"][j] + solution["Ramping Costs"][j] -solution["Revenue From Electricity"][j])/solution["Thermal Generation Mix"][j],2) if solution["Thermal Generation Mix"][j]>0 else 0 for j in instance.j  }  
-    solution["Total Ramping Costs"] = round(sum(solution["Ramping Costs"].values()),2) 
-    solution["Anual Total Costs"] = round(solution["Total Investment Costs"] + solution["Total O&M Costs"] + solution["Total Fuel Costs"] + solution["Total CO2 Costs"]+solution["Total Ramping Costs"],2)
-    solution["Total LCOH"] = round((solution["Anual Total Costs"]- solution["Total Revenue From Electricity"]) / solution["Total Thermal Generation"],2)
-    solution["Total Heat Demand"] = round(sum(solution["Heat Demand"]),2)
-    solution["Total Electricity Generation"] = round(sum(solution["Electricity Generation Mix"].values()),2) 
-    solution["Total CO2 Emissions"] = round(sum(solution["CO2 Emissions"].values()),2)  
+    solution["Total Revenue From Electricity"] = sum(solution["Revenue From Electricity"].values())  
+    solution["Total Fuel Costs"] = sum(solution["Fuel Costs"].values())  
+    solution["Total CO2 Costs"] = sum(solution["CO2 Costs"].values())     
+    solution["LCOH"] =  {j:(solution["Investment Cost (with existing power plants)"][j]+solution["O&M Cost"][j]+solution["Fuel Costs"][j] + solution["CO2 Costs"][j] + solution["Ramping Costs"][j] -solution["Revenue From Electricity"][j])/solution["Thermal Generation Mix"][j] if solution["Thermal Generation Mix"][j]>0 else 0 for j in instance.j  }  
+    solution["Total Ramping Costs"] = sum(solution["Ramping Costs"].values()) 
+    solution["Anual Total Costs"] = solution["Total Investment Costs"] + solution["Total O&M Costs"] + solution["Total Fuel Costs"] + solution["Total CO2 Costs"]+solution["Total Ramping Costs"]
+    solution["Total LCOH"] = (solution["Anual Total Costs"]- solution["Total Revenue From Electricity"]) / solution["Total Thermal Generation"]
+    solution["Total Heat Demand"] = sum(solution["Heat Demand"])
+    solution["Total Electricity Generation"] = sum(solution["Electricity Generation Mix"].values()) 
+    solution["Total CO2 Emissions"] = sum(solution["CO2 Emissions"].values())  
     for key in ["Thermal Generation Mix","CO2 Emissions"]:
         add_energy_carrier_key(key,solution,instance)
     
-    solution["Fuel Demand"] = {j:round(solution["Thermal Generation Mix"][j] / instance.n_th_j[j],2) for j in instance.j}
+    solution["Fuel Demand"] = {j:solution["Thermal Generation Mix"][j] / instance.n_th_j[j] for j in instance.j}
 
     key = "Thermal Generation Mix"
     key_new = 'Final Energy Demand by Energy carrier'
     solution[key_new] = dict()
     for j in instance.j:
         solution[key_new][instance.ec_j[j]] = solution[key_new].get(instance.ec_j[j],0) + solution[key][j] / instance.n_th_j[j]
-    solution[key_new] = {i:round(v,2) for i,v in solution[key_new].items()}
+    solution[key_new] = {i:v for i,v in solution[key_new].items()}
     
-    solution["Total Final Energy Demand"] = round(sum(solution["Final Energy Demand by Energy carrier"].values()),2) 
+    solution["Total Final Energy Demand"] = sum(solution["Final Energy Demand by Energy carrier"].values()) 
     #%%
 #    import pickle
 #    pickle.dump([solution,units],open(r"C:\Users\hasani\Desktop\test.dat","wb"))
@@ -172,6 +183,8 @@ def solution2json(instance,results,inv_flag):
             num=float(np.percentile(np.asarray(list(val.values()) if type(val) == dict else val).astype(float),90))
             value,suffix,scale =  fromEngNumber(num)
             units[key] = f"{suffix} {units[key]}"
+            units[key] = adapt_units(units[key])
+
             if type(val) == dict: 
                 for key2,val2 in val.items():
                     if type(val2) == list:
@@ -184,6 +197,7 @@ def solution2json(instance,results,inv_flag):
             value,suffix,scale =  fromEngNumber(val)
             solution[key] = value
             units[key] = f"{suffix} {units[key]}"
+            units[key] = adapt_units(units[key])
 #%%    
     solution["units"] = units
     return solution,None
