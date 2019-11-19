@@ -43,6 +43,7 @@ def calculation(output_directory, inputs_raster_selection, inputs_parameter_sele
 
     if data !=-1:
         data= {**data,**temperature_radiation}
+        heat_load = max(data["demand_th_t"].values())
         data,message = preprocessing(data,inv_flag)
     if data != -1:
         (_instance,_results),message = run(data,inv_flag)
@@ -95,7 +96,7 @@ def calculation(output_directory, inputs_raster_selection, inputs_parameter_sele
                 'Final Energy Demand by Energy carrier']
         list_of_tuples = [ dict(type="bar",label=f"{x} ({solution['units'][x]})",key=x) for x in bar_graphs ]
         
-        graphics = [ dict( xLabel="Technologies", 
+        graphics = [ dict( xLabel="Energy carrier" if "Energy carrier" in x["label"] else "Technologies", 
                            yLabel=x["label"], 
                           type = x["type"], 
                           data = dict( labels = list(solution[x['key']]), 
@@ -121,7 +122,8 @@ def calculation(output_directory, inputs_raster_selection, inputs_parameter_sele
                         "Total Heat Demand","Total Final Energy Demand"]
         
         indicators = [{"unit":solution["units"][key], "name":key,"value":solution[key]} for key in indicator_list]
-        indicators.append(dict(unit="-",name=f"Heat load profile and electricity price profile from folowing  NUTS-level used: {set((nuts0,nuts2))}",value=0))
+        indicators.append(dict(unit="-",name=f"Heat load profile and electricity price profile from following  NUTS-level used: {set((nuts0,nuts2))}",value=0))
+        indicators.append(dict(unit="MW",name="Peak heat load - Pmax (MW)",value=round(heat_load,0))) 
         result['indicator'] = indicators
         result['graphics'] = graphics
         result['vector_layers'] = []

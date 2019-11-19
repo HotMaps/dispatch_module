@@ -121,6 +121,7 @@ def run(data,inv_flag):
         rule = m.x_th_jt[j,t] <= m.demand_th_t[t] 
         return rule
     m.chp_geneartion_restriction4_jt = pyo.Constraint(m.j_chp,m.t,rule=chp_geneartion_restriction4_jt_rule)
+    m.waste_geneartion_restrictionjt = pyo.Constraint(m.j_waste,m.t,rule=chp_geneartion_restriction4_jt_rule)
     
     
     #%% Objective Function
