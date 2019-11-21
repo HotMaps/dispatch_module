@@ -165,8 +165,8 @@ def preprocessing(data,inv_flag):
     x_th_cap_j =            {mapper[key]:data["cap"][key] for key in tec}
 
     # Ramping Costs
-    c_ramp_chp =            100
-    c_ramp_waste =          100
+    c_ramp_chp =            data["ramp"]["chp"]
+    c_ramp_waste =          data["ramp"]["wi"]
 
     
     thresh = -20
