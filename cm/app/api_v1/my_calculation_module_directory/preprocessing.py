@@ -48,13 +48,9 @@ def get_user_input(inputs_parameter_selection,nuts,path=path_inputs_parameter):
             ("wi_elpSelect",0),
             ("chp_elpSelect",0),
             ("hp_elpSelect",0),
-            ("st_elpSelect",0),
             ("hb_elpSelect",0),
             ("wi_selpSelect",1),
-            ("chp_selpSelect",1),   
-            ("hp_selpSelect",1),
-            ("st_selpSelect",1),    
-            ("hb_selpSelect",1)]:
+            ("chp_selpSelect",1)]:
         test[i].append(add_jt_electricity_profiles(input_string,test[i],inputs_parameter_selection,nuts))
     
 
@@ -134,14 +130,14 @@ def preprocessing(data,inv_flag):
         ok_flag = False
     
     radiation_t =                   data["radiation_t"]
-    electricity_price_jt = data["electricity_price_jt"]
-    sale_electricity_price_jt = data["sale_electricity_price_jt"]
+    electricity_price_jt =          {(key,t):data["electricity_price_jt"].get((key,t),0) for key in tec for t in range(1,8760+1)}
+    sale_electricity_price_jt =     {(key,t):data["sale_electricity_price_jt"].get((key,t),0) for key in tec for t in range(1,8760+1)}
     temperature_t =                 data["temperature_t"]
     
     
     OP_fix_j =              {mapper[key]:data["opexFix"][key] for key in tec}
     OP_var_j =              {mapper[key]:data["opexVar"][key] for key in tec}
-    n_el_j =                {mapper[key]:data["nel"][key] for key in tec}
+    n_el_j =                {mapper[key]:data["nel"].get(key,0) for key in tec}
     
     mc = {}
     for j in tec:
