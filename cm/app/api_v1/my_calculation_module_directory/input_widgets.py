@@ -8,6 +8,7 @@ path_inputs_output=os.path.join(path2data,"INPUTS_CALCULATION_MODULE.txt")
 
 def load_input_widgets(CM_ID="CM_ID",path=path_inputs_parameter,outpath=path_inputs_output): 
     df = pd.read_excel(path).replace(np.nan, '', regex=True).astype(str)
+    df["input_type"] = df.input_type.str.strip()
     df["cm_id"] = CM_ID 
     out = df.to_dict(orient='records') 
      
