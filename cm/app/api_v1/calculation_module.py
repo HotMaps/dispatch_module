@@ -5,75 +5,139 @@ from ..helper import generate_output_file_tif, create_zip_shapefiles
 from ..constant import CM_NAME
 import time
 
+import numpy as np , pandas as pd
+from .my_calculation_module_directory.dispatch import run
+from .my_calculation_module_directory.preprocessing import preprocessing,reshape_profile,get_user_input
+from .my_calculation_module_directory.saveSolution import solution2json
+from .my_calculation_module_directory.raster_things import return_nuts_codes,get_max_heat_point,get_temperature_and_radiation
+
 """ Entry point of the calculation module function"""
+def calculation(output_directory, inputs_raster_selection, inputs_parameter_selection):
 
-#TODO: CM provider must "change this code"
-#TODO: CM provider must "not change input_raster_selection,output_raster  1 raster input => 1 raster output"
-#TODO: CM provider can "add all the parameters he needs to run his CM
-#TODO: CM provider can "return as many indicators as he wants"
-def calculation(output_directory, inputs_raster_selection,inputs_vector_selection, inputs_parameter_selection):
-    #TODO the folowing code must be changed by the code of the calculation module
+    
+    inv_flag  = True if inputs_parameter_selection["if_if"]=="invest" else False
+        
+    path_nuts_id_tif = inputs_raster_selection["nuts_id_number"]
 
-    # generate the output raster file
-    output_raster1 = generate_output_file_tif(output_directory)
+    (nuts0, nuts1, nuts2, nuts3),message  = return_nuts_codes(path_nuts_id_tif)
+    
+    ds = gdal.Open(inputs_raster_selection["heat"])
+    # get raster band
+    b = ds.GetRasterBand(1)
+    hdm_sum  = b.ReadAsArray().sum()
+    
+    p,message = get_max_heat_point(inputs_raster_selection["heat"])
+    if p != -1:
+        temperature_radiation,message = get_temperature_and_radiation(p,nuts0)
+    else:
+        temperature_radiation= -1
+    
+    if temperature_radiation !=-1:
+        data,message = get_user_input(inputs_parameter_selection,nuts=(nuts0, nuts1, nuts2, nuts3))
+    else:
+        data = -1
+    if data !=-1:
+        data,message = reshape_profile(hdm_sum,data) # set profile to match selected total heat demand
+    else:
+        data=-1
 
+    if data !=-1:
+        data= {**data,**temperature_radiation}
+        heat_load = max(data["demand_th_t"].values())
+        data,message = preprocessing(data,inv_flag)
+    if data != -1:
+        (_instance,_results),message = run(data,inv_flag)
+    else:
+        _instance = -1
+    
+    if _instance != -1:
+        solution,message = solution2json(_instance,_results,inv_flag)
+    else:
+        solution = -1
+#    print(solution)
 
-    #retrieve the inputs layes
-    input_raster_selection =  inputs_raster_selection["heat"]
-
-    #retrieve the inputs layes
-    input_vector_selection =  inputs_vector_selection["heating_technologies_eu28"]
-
-
-    #retrieve the inputs all input defined in the signature
-    factor =  float(inputs_parameter_selection["multiplication_factor"])
-
-
-    # TODO this part bellow must be change by the CM provider
-    ds = gdal.Open(input_raster_selection)
-    ds_band = ds.GetRasterBand(1)
-
-    #----------------------------------------------------
-    pixel_values = ds.ReadAsArray()
-    #----------Reduction factor----------------
-
-    pixel_values_modified = pixel_values* float(factor)
-    hdm_sum  = float(pixel_values_modified.sum())/1000
-
-
-    gtiff_driver = gdal.GetDriverByName('GTiff')
-    #print ()
-    out_ds = gtiff_driver.Create(output_raster1, ds_band.XSize, ds_band.YSize, 1, gdal.GDT_UInt16, ['compress=DEFLATE',
-                                                                                                         'TILED=YES',
-                                                                                                         'TFW=YES',
-                                                                                                         'ZLEVEL=9',
-                                                                                                         'PREDICTOR=1'])
-    out_ds.SetProjection(ds.GetProjection())
-    out_ds.SetGeoTransform(ds.GetGeoTransform())
-
-    ct = gdal.ColorTable()
-    ct.SetColorEntry(0, (0,0,0,255))
-    ct.SetColorEntry(1, (110,220,110,255))
-    out_ds.GetRasterBand(1).SetColorTable(ct)
-
-    out_ds_band = out_ds.GetRasterBand(1)
-    out_ds_band.SetNoDataValue(0)
-    out_ds_band.WriteArray(pixel_values_modified)
-
-    del out_ds
+    color_blind_palette= {   3: ['#0072B2', '#E69F00', '#F0E442'],
+        4: ['#0072B2', '#E69F00', '#F0E442', '#009E73'],
+        5: ['#0072B2', '#E69F00', '#F0E442', '#009E73', '#56B4E9'],
+        6: ['#0072B2', '#E69F00', '#F0E442', '#009E73', '#56B4E9', '#D55E00'],
+        7: [   '#0072B2',
+               '#E69F00',
+               '#F0E442',
+               '#009E73',
+               '#56B4E9',
+               '#D55E00',
+               '#CC79A7'],
+        8: [   '#0072B2',
+               '#E69F00',
+               '#F0E442',
+               '#009E73',
+               '#56B4E9',
+               '#D55E00',
+               '#CC79A7',
+               '#000000']}
+  
     # output geneneration of the output
-    graphics = []
-    vector_layers = []
+    if solution !=-1:
+        bar_graphs = ['Full Load Hours',
+				'Installed Capacities',
+				'LCOH',
+				'Investment Cost (with existing power plants)',
+				'O&M Cost',
+				'Fuel Costs',
+				'CO2 Costs',
+				'Ramping Costs',
+				'CO2 Emissions',
+				'Thermal Generation Mix',
+				'Electricity Generation Mix',
+				'Revenue From Electricity',
+                "Fuel Demand",
+                'CO2 Emissions by Energy carrier',
+				'Thermal Generation Mix by Energy carrier',
+                'Final Energy Demand by Energy carrier']
+        list_of_tuples = [ dict(type="bar",label=f"{x} ({solution['units'][x]})",key=x) for x in bar_graphs ]
+        
+        graphics = [ dict( xLabel="Energy carrier" if "Energy carrier" in x["label"] else "Technologies", 
+                           yLabel=x["label"], 
+                          type = x["type"], 
+                          data = dict( labels = list(solution[x['key']]), 
+                                      datasets = [ dict(  label=x["label"], 
+                                                          backgroundColor = color_blind_palette[len(list(solution[x['key']]))]  , 
+                                                          data = list(solution[x['key']].values()))] )) for x in list_of_tuples] 
+    
+        result = dict()
+        result['name'] = CM_NAME
+        
+        
+        indicator_list =['Total LCOH',
+        				'Anual Total Costs',
+        				'Total Revenue From Electricity',
+        				'Total Thermal Generation',
+        				'Total Electricity Generation',
+        				'Total Investment Costs',
+        				'Total O&M Costs',
+        				'Total Fuel Costs',
+        				'Total CO2 Costs',
+        				'Total Ramping Costs',
+        				'Total CO2 Emissions',
+                        "Total Heat Demand","Total Final Energy Demand"]
+        
+        indicators = [{"unit":solution["units"][key], "name":key,"value":solution[key]} for key in indicator_list]
+        indicators.append(dict(unit="-",name=f"Heat load profile and electricity price profile from following  NUTS-level used: {set((nuts0,nuts2))}",value=0))
+        indicators.append(dict(unit="MW",name="Peak heat load - Pmax (MW)",value=round(heat_load,0))) 
+        result['indicator'] = indicators
+        result['graphics'] = graphics
+        result['vector_layers'] = []
+        result['raster_layers'] = []
 
-    #TODO to create zip from shapefile use create_zip_shapefiles from the helper before sending result
-    #TODO exemple  output_shpapefile_zipped = create_zip_shapefiles(output_directory, output_shpapefile)
-    result = dict()
-    result['name'] = CM_NAME
-    result['indicator'] = [{"unit": "GWh", "name": "Heat density total multiplied by  {}".format(factor),"value": str(hdm_sum)}]
-    result['graphics'] = graphics
-    result['vector_layers'] = vector_layers
-    result['raster_layers'] = [{"name": "layers of heat_densiy {}".format(factor),"path": output_raster1} ]
-    print ('result',result)
+    else:
+        graphics = []
+        result = dict()
+        
+        result['indicator'] = [dict(unit="-",name=f"Notification: {message}",value=0)]
+        
+    from pprint import pprint
+    pprint(result) 
+    
     return result
 
 
