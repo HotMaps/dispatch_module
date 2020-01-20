@@ -23,6 +23,7 @@ TRANFER_PROTOCOLE ='http://'
 # 
 # =============================================================================
 
+
 INPUTS_CALCULATION_MODULE = [{'cm_id': CM_ID,
   'input_max': '1e+102',
   'input_min': '0',
