@@ -1,4 +1,4 @@
-# Calculation module documentation and guidelines
+# guideline for developing a calculation module for the Hotmaps toolbox
 
 **Important information:**
 
@@ -11,24 +11,39 @@ In order to use Gurobi please ask for a licence file at HES-SO development team.
 ```
 
 ## Table of contents
-- [Retrieve the CM base for your CM](#Retrieve-the-CM-base-for-your-CM)
-- [Application Structure](#Application-Structure)
-- [Calculation module inputs](#Calculation-module-inputs)
-- [Calculation module outputs](#Calculation-module-outputs)
-- [CM development guidelines in a local environment](#CM-development-guidelines-in-a-local-environment)
+
+- [Introduction](#Introduction)
+
+- [Connect a calculation module into the Hotmaps toolbox](#Connect-a-calculation-module-into-the-Hotmaps-toolbox)
+
+- [Retrieve the Hotmaps calculation module fundamentals](#Retrieve-the-Hotmaps-calculation-module-fundamentals)
+
+- [Caclulation module architecture](#Caclulation-module-architecture)
+
+- [Handling calculation module inputs](#Handling-calculation-module-inputs)
+
+- [Handling calculation module outputs](#Handling-calculation-module-outputs)
+
+- [Calculation module development in a local environment](#CM-development-guidelines-in-a-local-environment)
+
+- [ Adding layers for CM ](#Adding-layers-for-CM)
 
 
-#### Requirements
+
+## Introduction
+**Requirements**
 
 - Having GIT command installed on your computer
 - Having a Python version >= 3.5
 - Having a Gdal version >= 2.0
 
-### Definition
+**Calculation module definition**
 
 A calulation Module (CM) is a plugin for Hotmaps toolbox which is able to extend toolbox functionality.
 
-### How to connect a CM into the Hotmaps toolbox?
+
+## Connect a calculation module into the Hotmaps toolbox
+
 
 ```
 Registration and hearthbeat:
@@ -49,21 +64,20 @@ _______________________________
 
 ```
 
+
 The CM can run on its own, but when it is on the same network as the Hotmaps toolbox API (HTAPI), it will be automatically detected.
-Using Celery queue to register, HTAPI contains heartbeat that will Check at anytime if a calculation is running or not. That means the achitecture for CMs is working in realtime
- 
-**Calculation module regitration**
+Using Celery queue to register, HTAPI contains heartbeat that will check at anytime if a calculation is running or not. In other words, the achitecture is working in realtime and detects new CMs.
+
+
 
 <code><ins>**[To Top](#table-of-contents)**</ins></code>
 
-###### Calculation module registration:
-
-The HTAPI will retrieve the CM SIGNATURE and modify the frontend to allow the user to use the CM and modify the user interface with the inputs it needs to be ran.
 
 
-## Retrieve the CM base for your CM
 
-Find below the architecture of the CMs. Each CM inherits from the base calculation module (cm base):
+##Retrieve the Hotmaps calculation module fundamentals
+
+The architecture of the Hotmaps repositories is illustrated below. Each CM inherits from the base calculation module (cm base; upstream):
 
 ```
 GIT Repository architecture:
@@ -83,11 +97,17 @@ GIT Repository architecture:
 
 ```
 
-1. Create a repository on your Github account named **name_of_my_module**.\
-Create a folder on your computer with the same name and go inside the folder.\
-Let the repository of your new module empty until you retrieve the **base_calculation_module** code.
 
-2. Use these following git commands to retrieve the code:
+In order to create a Hotmaps repository, follow the belowing steps.
+
+
+
+1. Create a repository on your Hotmaps GitHub account and assign a name to it, e.g. **name_of_my_module**.\
+Do **NOT** initialize the reposiany with a license nor a readme file.
+Create an empty folder on your computer with the same name and go inside the folder.\
+
+2. Use these following git commands to retrieve the code of **base_calculation_module**:
+
 ``` bash
   git init
   git remote add origin https://github.com/YourUsername/name_of_my_module.git # add a remote link to your repository
@@ -134,10 +154,11 @@ git push origin develop
 git pull upstream master
 ```
 
-``` 
+*If you encounter any issue like GIT conflict please contact CREM.(support@crem.ch)*
 
 
-6. Release a version of my CM
+6. Release a version of your CM
+
 
   After testing your calculation module you can update the release branch (master branch)
 ```bash
@@ -156,9 +177,12 @@ git push origin master # push changes on master branch
 
 *******************************   
 
-## Application Structure:
+## Caclulation module architecture:
 
-Find below, the architecture of the CM:
+
+The architecture of a sample Hotmaps CM is illustrated below:
+
+
 
 ```
     cm/
@@ -166,6 +190,7 @@ Find below, the architecture of the CM:
     │   ├── api_v1/
     │   │    ├── __init__.py
     │   │    ├── calculation_module.py
+    │   │    ├── my_calculation_module_directory   
     │   │    ├── errors.py
     │   │    └── transactions.py
     │   │
@@ -209,55 +234,37 @@ Find below, the architecture of the CM:
     └── README.md
 ```
 
+* `app/requirements.txt` - the list of Python framework  (PyPi) requirements.
+
+* `app/api_v1/calculation_module.py` - hear you can call your CM
+* `app/api_v1/my_calculation_module_directory` - all additionnal files for running the calculation module must be added in this directory
+
+
+* `app/api_v1/transactions.py` - contains all the requests that enable to interact with the CM
+* `app/constant.py` - contains the constants of the applications the most important constant is the <code><ins>**[SIGNATURE](#Signature-definition)**</ins></code>
 
 ***************************************************
 
-## Calculation module inputs
+## Handling calculation module inputs
 
-In this section is explained the management of the different kinds of inputs
 
-### Signature inputs
+In this section, the management of different input types accepted by Hotmaps base calculation module is explained.
 
+#### SIGNATURE definition
+In order to identify each calculation module, the system need a SIGNATURE that CM provider should add.
 SIGNATURE describes the parameters needed by the calculation module. This signature can be found in `constant.py`. It must be modified by the developer.
 See below an example for a signature:
 
 
-
-**SIGNATURE INPUTS** :
-
-Signature describes the calculation module needed parameters and how to use it. This signature can be found in **constants.py** file. the SIGNATURE must be modified by the developer this signature can be divided into 2 parts,
-see bellow:
-   
-    
-    
-    INPUTS_CALCULATION_MODULE=  [
-        { 'input_name': 'Reduction factor',
-          'input_type': 'input',
-          'input_parameter_name': 'multiplication_factor',
-          'input_value': 1,
-          'input_unit': 'none',
-          'input_min': 1,
-          'input_max': 10
-            , 'cm_id': CM_ID
-          },
-        { 'input_name': 'Blablabla',
-          'input_type': 'range',
-          'input_parameter_name': 'bla',
-          'input_value': 50,
-          'input_unit': '',
-          'input_min': 10,
-          'input_max': 1000,
-          'cm_id': CM_ID
-          }
-    ]
-    
-  
-    
+```
     SIGNATURE = {
         "category": "Buildings",
         "cm_name": CM_NAME,
         "layers_needed": [
             "heat_density_tot"
+        ],
+        "vector_needed": [
+            "industrial_site"
         ],
         "type_layer_needed": [
                 "heat",
@@ -281,6 +288,8 @@ This is the category of the calculation module
 - **category**: category of the calculation module ;
 - **cm_name**: name of the calculation module that will be displayed on the frontend (GUI) ;
 - **layers_needed**: layers needed to run the calculation module, for example:
+
+
 ```bash
     "layers_needed": [
            "heat_density_tot",
@@ -289,15 +298,31 @@ This is the category of the calculation module
            "gfa_res_curr_density_lau"
        ],
 ```
- When HTAPI will be compute a CM, it will send a python dictionnary named  inputs_raster_selection in which there is a key the name of the layer for example heat_curr_density_tot and a value the name of the files generated by HATPI  
- by using this value CM can directly retrieve a clipped dataset 
- 
- 
- **vectors needed:**
- 
- Vectors needed to run the calculation module
- please find an example input vectors_needed: 
- ```bash
+layers_needed only refers to the rasters, please find the list of layer <code><ins>**[here](#Retrieving-list-of-layers-available-for-CM )**</ins></code>
+
+
+
+
+ When the HTAPI detects a CM, it will send a python dictionary named  **inputs_raster_selection**. This dictionary contains the name of the layer (for example *heat_tot_curr_density*) and the name of the files generated by the HATPI.
+
+- **type_layer_needed**: each layer has a type necessary to the CM. It is particularly needed in order to handle the  <code><ins>**[symbology](#symbology )**</ins></code>of the layer. the different types are :
+   * *heat*,
+   * *gross_floor_area*,
+   * *building_volumes*,
+   * *solar_optimal_total*
+   
+
+  example:
+```bash
+     clipped_heat = inputs_raster_selection["heat"]  
+     clipped_gfa = inputs_raster_selection["gross_floor_area"]
+     clipped_solar_optimal_total = inputs_raster_selection["solar_optimal_total"]  
+```
+
+- **vectors_needed**: vectors needed to run the calculation module, for example:
+
+**To-Do:** Mention that all values in the dictionary are strings.
+```bash
      "vectors_needed": [
             "heating_technologies_eu28",
         ],
@@ -398,7 +423,9 @@ layers type allows to handle custom layer from the user and the ablility to chos
 
 <code><ins>**[To Top](#table-of-contents)**</ins></code>
 
-### Calculation module inputs, graphic user interface (GUI)
+### Calculation module input types shown in the front-end
+
+
 
 The purpose of this part is to give the ability to the developer to build his own user interface.
 The JSON payload is an array of inputs and will be used to modify automatically the user interface. For example:
@@ -422,13 +449,15 @@ The JSON payload is an array of inputs and will be used to modify automatically 
 
 ***CALCULATION MODULE GRAPHIC USER INTERFACE INPUTS***
 
+
+
+
 - **input_name**: name of the CM that will be displayed on the frontend GUI
 
 - **input_type**: the input is the graphical control element that the user needs in order to enter data. There are five possible inputs, see https://getuikit.com/docs/form for more information about the implementation of the frontend GUI.
 
- it is the name of the CM that will be displayed on the frontend (User interface)
- 
- **Input type:**
+
+  - input: this is a textbox in which the user can enter a value
 
  The input is the graphical control element that user need to access enter data. There are five possible inputs, see https://getuikit.com/docs/form for more information about the implementation of the frontend GUI
  - input:
@@ -535,9 +564,10 @@ Find below two examples of inputs, one with a type *input* and the other one wit
 *******************************   
 ***CALCULATION MODULE OUTPUTS:***
 
-## Calculation module outputs
+## Handling calculation module outputs
+ In oder to show the outputs of your CM in the front-end, your CM should respect the guidelines defined by base_calculation_module.
+The purpose of this part is to give developers the ability to build different kinds of outputs (graphic, layers, indicators). All the outputs should be retunred in form of a dictionary ("result" dictionary). Find below an example:
 
-The purpose of this part is to give developers the ability to build different kinds of outputs (graphic, layers, indicators). Find below and example:
 
 ```python
   "result": {
@@ -577,7 +607,8 @@ The purpose of this part is to give developers the ability to build different ki
 
 ### Indicators
 
-In `transaction.py`, the CM provider can modify the output in order to display as many indicators as he wants on the frontend. This indicator will be displayed on the result panel of the frontend.
+In `transaction.py`, the CM provider can modify the output in order to display as many indicators as he/she wants on the front-end. This indicator will be displayed on the RESULT panel of the front-end.
+
 
 ##### Structure of the indicator output
 
@@ -592,6 +623,9 @@ In `transaction.py`, the CM provider can modify the output in order to display a
 
 #### Raster layers
 
+
+**To-Do:** I suggest to add "symbology" section for the custom type in the raster and vector layers and not after them. Regarding "type", please mention which types are available (for raster and vector) and can be chosen?
+
 ##### Structure of the raster output
 
 - **raster_layers (array):** array of raster layers
@@ -600,7 +634,10 @@ In `transaction.py`, the CM provider can modify the output in order to display a
     - **type (string):** type of the layer generated
 
 
-The path must be generated on the first lines of *calculation()* function found in `calculation_module.py` and uses the function *generate_output_file_tif()* which needs the output directory as an argument. For example:
+In order to generate a path, developers should use the function *generate_output_file_tif()*, which needs the output directory as an argument. This function should be imported to the `calculation_module.py`. The path must be generated on the first lines of *calculation()* function found in `calculation_module.py`.  This funciton For example:
+
+
+
 
 ```python
   output_tif_1 = generate_output_file_tif(output_directory)
@@ -660,36 +697,18 @@ The path must be generated on the first lines of *calculation()* function found 
 
 
 #### Vector layers
-
-##### Structure of the vector output
-
-- **vector_layers (array):** array of vector layers
-  - **name (string):** name to be displayed on the frontend
-  - **path (string):** path generated for the vector file
-  - **type (string):** type of the layer generated
-
-
-The path must be generated on the first lines of *calculation()* function found in `calculation_module.py` and uses the function *generate_output_file_shp()* which needs the output directory as an argument. For example:
-
-```python
-  output_shp_1 = generate_output_file_shp(output_directory)
-```
-
-Before sending **result** back to the HTAPI, the CM must generate a zip file, that will be handled by the HTAPI. To do so the CM provider must use the following function and write the output on the json array.
-
-```python
-  output_shp_zipped_1 = create_zip_shapefiles(output_directory, output_shp_1)
-```
-
-All the layer outputs must be retrieved and added to the **vector_layers** array after they have been generated by the calculation module provider functions and compressed with the function *create_zip_shapefiles()*.
-
-
 #### Symbology
+
+**To-Do:** here, first explain what is symbology and where it is being used and what is its impact (where can the developer expect to see it)
+
 
 ##### Raster
 
 There are two types of symbologies handled, both are recognized with the *type* field of the layer:
   - the predefined symbology : you do not need to create a new symbology because it has already been defined for the type you have chosen. Raster layers have four defined symbologies: *heat*, *gross_floor_area*, *building_volumes*, *solar_optimal_total* ;
+
+
+
 
   - the custom symbology: if ever the symbology of your layer does not already exist, it is possible for you to create it. You simply have to set the *type* on "custom" and add a new field *symbology*. This new field must contain values for:
     - the RGB colors (between 0 and 255 for each of the three)
@@ -792,23 +811,31 @@ In the output of the calculation module, vector layers have the exact same manag
 - **data:** Contains label and datasets
     - **labels (string[]) :** x axis labels
 
-### CSV files
+##### Structure of the vector output
 
-##### Structure of csv
+- **vector_layers (array):** array of vector layers
+  - **name (string):** name to be displayed on the frontend
+  - **path (string):** path generated for the vector file
+  - **type (string):** type of the layer generated
 
-- **csv_files (array):** array of csv layer
-   - **name (string):** name to be displayed on the frontend
-   - **path (string):** path generated for the csv file
 
-
-The path must be generated on the first lines of *calculation()* function found in `calculation_module.py` and uses the function *generate_output_file_csv()* which needs the output directory as an argument. For example:
+The path must be generated on the first lines of *calculation()* function found in `calculation_module.py` and uses the function *generate_output_file_shp()* which needs the output directory as an argument. For example:
 
 ```python
-  output_csv_path_1 = generate_output_file_csv(output_directory)
+  output_shp_1 = generate_output_file_shp(output_directory)
 ```
 
+Before sending **result** back to the HTAPI, the CM must generate a zip file, that will be handled by the HTAPI. To do so the CM provider must use the following function and write the output on the json array.
 
-******************************************************************************************
+```python
+  output_shp_zipped_1 = create_zip_shapefiles(output_directory, output_shp_1)
+```
+
+All the layer outputs must be retrieved and added to the **vector_layers** array after they have been generated by the calculation module provider functions and compressed with the function *create_zip_shapefiles()*.
+
+
+
+<code><ins>**[To Top](#table-of-contents)**</ins></code>
 
 ### Graphics
 
@@ -845,11 +872,14 @@ the documentation can be check at http://0.0.0.0:5001/apidocs/)
   - **xLabel:** define the text displayed on x-axis,
   - **yLabel:** define the text displayed on y-axis (ex:Heat power(MW)),
   - **data:** contains label and datasets
-      - **labels (string[]) :** x axis labels
+      - **labels (string[]) :** x axis labels  only x axis.
+
       - **datasets (array):** set of data with its configuration
           -  **label (string) :** serie's label
           -  **backgroundColor (string[]) :** background color of each value to display
           -  **data (number[]) :** values of the serie
+
+
 
 <code><ins>**[To Top](#table-of-contents)**</ins></code>
 
@@ -860,6 +890,7 @@ the documentation can be check at http://0.0.0.0:5001/apidocs/)
 Please find in the link below the list of layers available as input for a CM (ressource name column):
 
 https://docs.google.com/spreadsheets/d/1cGMRWkgIL8jxghrpjIWy6Xf_kS3Dx6LqGNfrCBLQ_GI/edit#gid=1730959780
+
 
 *******************************************************************
 
@@ -905,6 +936,7 @@ If the test ran without any error, `constant.py` must be changed in order to
 `calculation_module.py` is a bridge between the CM functions and the CM architecture. The new code must be added to the directory **my_calculation_module_directory**
 
 
+**To-Do:** I suggest to include where the unit-test should be written. Otherwise, runing the test.py returns error.
 
 ### Running my CM with docker
 
@@ -912,6 +944,16 @@ In the root directory:
 ```bash
   docker-compose up -d --build
 ```
+
+## Adding layers for CM 
+
+1. Create a repository in Hotmaps GitLab (To-Do: also provide the link to the Hotmaps gitlab) with the name of the layer in lower case
+ *layer_name/data/layer_name.tif*, the repository name must be the same as the layer
+
+2. this data must be uploaded in the hotmaps server in the folowing place *var/hotmaps/repositories/layer_name/data/layer_name.tif*
+this is usally done by the data integration when a new layer in added to the Gitlab repository of Hotmaps
+3. this data must be known by frontend by adding the layer in the file layer-interation.data.ts (https://github.com/HotMaps/Hotmaps-toolbox-client/blob/master/src/app/features/layers-interaction/layers-interaction.data.ts)
+
 
 <code><ins>**[To Top](#table-of-contents)**</ins></code>
 
