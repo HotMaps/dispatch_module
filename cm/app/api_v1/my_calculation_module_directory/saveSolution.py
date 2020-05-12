@@ -106,6 +106,7 @@ def solution2json(instance,results,inv_flag):
     units["Fuel Demand"] = "MWh/yr"
     units['Final Energy Demand by Energy carrier'] = "MWh/yr"
     units["Total Final Energy Demand"] = "MWh/yr"
+    units["Peak heat load"] = "MW"
 # =============================================================================
 #   Define outputs
 # =============================================================================
@@ -169,6 +170,7 @@ def solution2json(instance,results,inv_flag):
     solution[key_new] = {i:v for i,v in solution[key_new].items()}
     
     solution["Total Final Energy Demand"] = sum(solution["Final Energy Demand by Energy carrier"].values()) 
+    solution["Peak heat load"] = max(instance.demand_th_t.values())
     #%%
 #    import pickle
 #    pickle.dump([solution,units],open(r"C:\Users\hasani\Desktop\test.dat","wb"))

@@ -633,7 +633,17 @@ INPUTS_CALCULATION_MODULE = [{'cm_id': CM_ID,
   'input_priority': '3',
   'input_type': 'input',
   'input_unit': 'EUR/MWh',
-  'input_value': '0.5'}]
+  'input_value': '0.5'},
+ {'cm_id': CM_ID,
+  'input_max': '1e+102',
+  'input_min': '0',
+  'input_name': 'district heating demand ',
+  'input_parameter_name': 'dh_demand',
+  'input_priority': '0',
+  'input_type': 'input',
+  'input_unit': 'MWh',
+  'input_value': '0'}, 
+ ]
 
 
 

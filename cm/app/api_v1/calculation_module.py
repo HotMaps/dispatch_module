@@ -24,7 +24,8 @@ def calculation(output_directory, inputs_raster_selection, inputs_parameter_sele
     ds = gdal.Open(inputs_raster_selection["heat"])
     # get raster band
     b = ds.GetRasterBand(1)
-    hdm_sum  = b.ReadAsArray().sum()
+    dh_demand = float(inputs_parameter_selection["dh_demand"])
+    hdm_sum  = b.ReadAsArray().sum() if dh_demand==0 else dh_demand
     
     p,message = get_max_heat_point(inputs_raster_selection["heat"])
     if p != -1:
@@ -119,11 +120,12 @@ def calculation(output_directory, inputs_raster_selection, inputs_parameter_sele
         				'Total CO2 Costs',
         				'Total Ramping Costs',
         				'Total CO2 Emissions',
-                        "Total Heat Demand","Total Final Energy Demand"]
+                        "Total Heat Demand","Total Final Energy Demand",
+                        "Peak heat load"]
         
         indicators = [{"unit":solution["units"][key], "name":key,"value":solution[key]} for key in indicator_list]
         indicators.append(dict(unit="-",name=f"Heat load profile and electricity price profile from following  NUTS-level used: {set((nuts0,nuts2))}",value=0))
-        indicators.append(dict(unit="MW",name="Peak heat load - Pmax (MW)",value=round(heat_load,0))) 
+        # indicators.append(dict(unit="MW",name="Peak heat load - Pmax (MW)",value=round(heat_load,2))) 
         result['indicator'] = indicators
         result['graphics'] = graphics
         result['vector_layers'] = []
