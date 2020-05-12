@@ -14,7 +14,7 @@ def isfloat(value):
     except ValueError:
         return False
 
-def fromEngNumber(num):
+def get_scale(suffix_string):
     _suffix_lookup_table = {
         'p': 1e-12,
         'n': 1e-9,
@@ -26,6 +26,12 @@ def fromEngNumber(num):
         'G': 1e9,
         'T': 1e12}
     try:
+        return _suffix_lookup_table[suffix_string.strip()]
+    except:
+        return 1e0
+
+def fromEngNumber(num):
+    try:
         eng_num=str(EngNumber(num))
     except:
         eng_num = str(num)
@@ -35,7 +41,7 @@ def fromEngNumber(num):
     else:
         value = float(eng_num[:-1])            
         suffix = eng_num[-1]
-    scale = _suffix_lookup_table[suffix]            
+    scale = get_scale(suffix)         
     return value,suffix,scale
 
 def adapt_units(string):
@@ -54,7 +60,48 @@ def add_energy_carrier_key(key,solution,instance):
     solution[key_new] = dict()
     for j in instance.j:
         solution[key_new][instance.ec_j[j]] = solution[key_new].get(instance.ec_j[j],0) + solution[key][j]
-    solution[key_new] = {i:v for i,v in solution[key_new].items()}       
+    solution[key_new] = {i:v for i,v in solution[key_new].items()}     
+    
+def pretty_units(solution,units):
+    for key,val in solution.items():
+        if key == "Technologies":
+            continue
+        if type(val) == dict or type(val) == list:
+            num=float(np.percentile(np.asarray(list(val.values()) if type(val) == dict else val).astype(float),90))
+            value,suffix,scale =  fromEngNumber(num)
+            units[key] = f"{suffix} {units[key]}"
+            units[key] = adapt_units(units[key])
+
+            if type(val) == dict: 
+                for key2,val2 in val.items():
+                    if type(val2) == list:
+                        solution[key][key2] = (np.asarray(val2)/scale).round(2).tolist()
+                    else:
+                        solution[key][key2] = round(val2/scale,2)
+            else:
+                solution[key] = (np.asarray(val)/scale).round(2).tolist()
+        else:
+            value,suffix,scale =  fromEngNumber(val)
+            solution[key] = value
+            units[key] = f"{suffix} {units[key]}"
+            units[key] = adapt_units(units[key])
+
+def same_units(solution,units):
+    for key,val in solution.items():
+        if key == "Technologies":
+            continue
+        if type(val) == dict: 
+            for key2,val2 in val.items():
+                if type(val2) == list:
+                    solution[key][key2] = np.asarray(val2).round(2).tolist()
+                else:
+                    solution[key][key2] = f"{val2:.2e}"
+        elif type(val) == list: 
+            solution[key] = np.asarray(val).round(2).tolist()
+        else:
+            solution[key] = f"{solution[key]:.2e}"
+            
+
 @decore_message
 def solution2json(instance,results,inv_flag):
 # =============================================================================
@@ -171,37 +218,9 @@ def solution2json(instance,results,inv_flag):
     
     solution["Total Final Energy Demand"] = sum(solution["Final Energy Demand by Energy carrier"].values()) 
     solution["Peak heat load"] = max(instance.demand_th_t.values())
-    #%%
-#    import pickle
-#    pickle.dump([solution,units],open(r"C:\Users\hasani\Desktop\test.dat","wb"))
-    #%%
-#    import pickle
-#    import numpy as np
-#    solution,units = pickle.load(open(r"C:\Users\hasani\Desktop\test.dat","rb"))
-#    from engineering_notation import EngNumber 
     
-    for key,val in solution.items():
-        if key == "Technologies":
-            continue
-        if type(val) == dict or type(val) == list:
-            num=float(np.percentile(np.asarray(list(val.values()) if type(val) == dict else val).astype(float),90))
-            value,suffix,scale =  fromEngNumber(num)
-            units[key] = f"{suffix} {units[key]}"
-            units[key] = adapt_units(units[key])
-
-            if type(val) == dict: 
-                for key2,val2 in val.items():
-                    if type(val2) == list:
-                        solution[key][key2] = (np.asarray(val2)/scale).round(2).tolist()
-                    else:
-                        solution[key][key2] = round(val2/scale,2)
-            else:
-                solution[key] = (np.asarray(val)/scale).round(2).tolist()
-        else:
-            value,suffix,scale =  fromEngNumber(val)
-            solution[key] = value
-            units[key] = f"{suffix} {units[key]}"
-            units[key] = adapt_units(units[key])
+    # pretty_units(solution, units)
+    same_units(solution, units)
 #%%    
     solution["units"] = units
     return solution,None
