@@ -216,6 +216,14 @@ def solution2json(instance,results,inv_flag):
         solution[key_new][instance.ec_j[j]] = solution[key_new].get(instance.ec_j[j],0) + solution[key][j] / instance.n_th_j[j]
     solution[key_new] = {i:v for i,v in solution[key_new].items()}
     
+    keys = ["Thermal Generation Mix by Energy carrier","CO2 Emissions by Energy carrier",'Final Energy Demand by Energy carrier']
+    ec_list = [ 'wood pellets','electricity', 'bio gas', 'waste', 'radiation', 'various']
+    for key in keys:
+        for ec in ec_list:
+            solution[key][ec] = solution[key].get(ec,0)
+    
+        
+    
     solution["Total Final Energy Demand"] = sum(solution["Final Energy Demand by Energy carrier"].values()) 
     solution["Peak heat load"] = max(instance.demand_th_t.values())
     
