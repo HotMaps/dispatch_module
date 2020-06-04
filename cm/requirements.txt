@@ -19,8 +19,9 @@ amqp==2.4.0
 scipy
 pandas
 networkx
-pyomo
+pyomo==5.6.2
 fiona==1.8.4
-geopandas==0.5.1
+geopandas==0.5.0
 xlrd==1.2.0
 engineering_notation
+pyproj==1.9.6
