@@ -676,7 +676,7 @@ SIGNATURE = {
     the share of energy carriers used and the implied CO2 emissions. The module 
     can also be used to optimise the capacities of installed heat supply technologies""",
     "cm_id": CM_ID,
-    
+    "wiki_url":"https://wiki.hotmaps.eu/en/CM-District-heating-supply-dispatch",
     'inputs_calculation_module': INPUTS_CALCULATION_MODULE,
     
     'authorized_scale' : ["NUTS 3", "NUTS 2","NUTS 1", "NUTS 0","Hectare","LAU 2"]
