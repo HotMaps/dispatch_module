@@ -660,11 +660,7 @@ SIGNATURE = {
     {"type" : "heat","description" : ""},
     {"type" : "nuts_id_number","description" : ""}
     ],
-
-
-    "vectors_needed": [
-    
-    ],
+    "type_vectors_needed": [],
     "cm_url": "Do not add something",
     
     "cm_description": """ This module calculates the cost-minimal operation of a 

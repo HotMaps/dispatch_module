@@ -1,8 +1,10 @@
+import os
 
 from osgeo import gdal
 
 from ..helper import generate_output_file_tif, create_zip_shapefiles
 from ..constant import CM_NAME
+import pandas as pd
 import time
 
 import numpy as np , pandas as pd
