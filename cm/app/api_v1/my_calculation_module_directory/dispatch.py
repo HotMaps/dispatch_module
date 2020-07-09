@@ -48,7 +48,7 @@ def run(data,inv_flag):
     m.max_rad = pyo.Param()
     m.em_j = pyo.Param(m.j)
     m.pco2 = pyo.Param()
-    m.ec_j = pyo.Param(m.j)
+    m.ec_j = pyo.Param(m.j,within=pyo.Any)
     #%% decision variables 
     m.x_th_jt = pyo.Var(m.j,m.t,within=pyo.NonNegativeReals)
     m.x_el_jt = pyo.Var(m.j,m.t,within=pyo.NonNegativeReals)
