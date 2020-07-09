@@ -172,7 +172,7 @@ def preprocessing(data,inv_flag):
     c_ramp_waste =          data["ramp"]["wi"]
 
     
-    thresh = -20
+    thresh = -50
     all_heat_geneartors = tec    
 
     IK_j = {mapper[key]:data["ic"][key] for key in tec}
