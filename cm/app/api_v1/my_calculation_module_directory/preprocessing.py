@@ -126,14 +126,14 @@ def preprocessing(data,inv_flag):
     max_demad =             max(demand_th_t.values())
     max_installed_caps =    sum([data["cap"][key] for key in tec])
     ok_flag = True
-    if (max_installed_caps <= max_demad) and not inv_flag:
+    if (max_installed_caps <= max_demad*2) and not inv_flag:
         ok_flag = False
-        error_message = f"The installed capacities are not enough to cover the load, (Qmax: {round(max_demad,2)} MW & installed Capacities: {round(max_installed_caps,2)} MW)"
+        error_message = f"The installed capacities are not enough to cover the load, (Qmax: {round(max_demad*2,2)} MW & installed Capacities: {round(max_installed_caps,2)} MW)"
     
     for key in tec:
-        if data["cap"][key] > max_demad:
+        if data["cap"][key] > max_demad*2:
             ok_flag = False
-            error_message = f"The installed capacity of {round(data['cap'][key],2)}MW for {mapper[key]} exceeds the maximum permissible value of {round(max_demad,2)}MW"
+            error_message = f"The installed capacity of {round(data['cap'][key],2)}MW for {mapper[key]} exceeds the maximum permissible value of {round(max_demad*2,2)}MW"
             break
     
     radiation_t =                   data["radiation_t"]
