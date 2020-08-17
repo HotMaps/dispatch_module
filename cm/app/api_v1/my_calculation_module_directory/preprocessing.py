@@ -124,11 +124,11 @@ def preprocessing(data,inv_flag):
     demand_th_t =           data["demand_th_t"]
     #%
     max_demad =             max(demand_th_t.values())
-    max_installed_caps =    sum([data["cap"][key] for key in tec])
+    max_installed_caps =    sum([data["cap"][key] for key in tec if key not in j_st])
     ok_flag = True
-    if (max_installed_caps <= max_demad*2) and not inv_flag:
+    if (max_installed_caps <= max_demad) and not inv_flag:
         ok_flag = False
-        error_message = f"The installed capacities are not enough to cover the load, (Qmax: {round(max_demad*2,2)} MW & installed Capacities: {round(max_installed_caps,2)} MW)"
+        error_message = f"The installed capacities (w.o. solar thermal) are not enough to cover the load, (Qmax: {round(max_demad,2)} MW & installed Capacities: {round(max_installed_caps,2)} MW)"
     
     for key in tec:
         if data["cap"][key] > max_demad*2:
