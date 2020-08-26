@@ -48,7 +48,7 @@ def run(data,inv_flag):
     m.max_rad = pyo.Param()
     m.em_j = pyo.Param(m.j)
     m.pco2 = pyo.Param()
-    m.ec_j = pyo.Param(m.j)
+    m.ec_j = pyo.Param(m.j,within=pyo.Any)
     #%% decision variables 
     m.x_th_jt = pyo.Var(m.j,m.t,within=pyo.NonNegativeReals)
     m.x_el_jt = pyo.Var(m.j,m.t,within=pyo.NonNegativeReals)
@@ -67,7 +67,7 @@ def run(data,inv_flag):
     def capacity_restriction_max_j_rule (m,j):
         #% ToDo: Define upper bound because when technologies can make revenues 
         if inv_flag:
-            rule = m.Cap_j[j]  <= m.max_demad
+            rule = m.Cap_j[j]  <= m.max_demad*2
         else:
             rule = m.Cap_j[j] == m.x_th_cap_j[j]
         return rule
@@ -98,7 +98,7 @@ def run(data,inv_flag):
         if m.temperature_t[t] <= m.thresh:
             return m.x_th_jt[j,t] == 0
         else:
-            return m.x_th_jt[j,t] <=  m.max_demad
+            return m.x_th_jt[j,t] <=  m.Cap_j[j]
     m.heat_pump_restriction_jt = pyo.Constraint(m.j_hp,m.t,rule=heat_pump_restriction_jt_rule)
     
     def ramp_j_chp_t_rule (m,j,t):

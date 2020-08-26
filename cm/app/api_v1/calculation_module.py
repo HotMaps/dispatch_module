@@ -1,8 +1,10 @@
+import os
 
 from osgeo import gdal
 
 from ..helper import generate_output_file_tif, create_zip_shapefiles
 from ..constant import CM_NAME
+import pandas as pd
 import time
 
 import numpy as np , pandas as pd
@@ -24,7 +26,8 @@ def calculation(output_directory, inputs_raster_selection, inputs_parameter_sele
     ds = gdal.Open(inputs_raster_selection["heat"])
     # get raster band
     b = ds.GetRasterBand(1)
-    hdm_sum  = b.ReadAsArray().sum()
+    dh_demand = float(inputs_parameter_selection["dh_demand"])
+    hdm_sum  = b.ReadAsArray().sum() if dh_demand==0 else dh_demand
     
     p,message = get_max_heat_point(inputs_raster_selection["heat"])
     if p != -1:
@@ -123,7 +126,7 @@ def calculation(output_directory, inputs_raster_selection, inputs_parameter_sele
         
         indicators = [{"unit":solution["units"][key], "name":key,"value":solution[key]} for key in indicator_list]
         indicators.append(dict(unit="-",name=f"Heat load profile and electricity price profile from following  NUTS-level used: {set((nuts0,nuts2))}",value=0))
-        indicators.append(dict(unit="MW",name="Peak heat load - Pmax (MW)",value=round(heat_load,0))) 
+        indicators += [{"unit":solution["units"][key], "name":key,"value":solution[key]} for key in ["Peak heat load"]]
         result['indicator'] = indicators
         result['graphics'] = graphics
         result['vector_layers'] = []

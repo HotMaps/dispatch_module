@@ -23,6 +23,7 @@ TRANFER_PROTOCOLE ='http://'
 # 
 # =============================================================================
 
+
 INPUTS_CALCULATION_MODULE = [{'cm_id': CM_ID,
   'input_max': '1e+102',
   'input_min': '0',
@@ -632,7 +633,17 @@ INPUTS_CALCULATION_MODULE = [{'cm_id': CM_ID,
   'input_priority': '3',
   'input_type': 'input',
   'input_unit': 'EUR/MWh',
-  'input_value': '0.5'}]
+  'input_value': '0.5'},
+ {'cm_id': CM_ID,
+  'input_max': '1e+102',
+  'input_min': '0',
+  'input_name': 'district heating demand ',
+  'input_parameter_name': 'dh_demand',
+  'input_priority': '0',
+  'input_type': 'input',
+  'input_unit': 'MWh',
+  'input_value': '0'}, 
+ ]
 
 
 
@@ -649,11 +660,7 @@ SIGNATURE = {
     {"type" : "heat","description" : ""},
     {"type" : "nuts_id_number","description" : ""}
     ],
-
-
-    "vectors_needed": [
-    
-    ],
+    "type_vectors_needed": [],
     "cm_url": "Do not add something",
     
     "cm_description": """ This module calculates the cost-minimal operation of a 
@@ -665,7 +672,7 @@ SIGNATURE = {
     the share of energy carriers used and the implied CO2 emissions. The module 
     can also be used to optimise the capacities of installed heat supply technologies""",
     "cm_id": CM_ID,
-    
+    "wiki_url":"https://wiki.hotmaps.eu/en/CM-District-heating-supply-dispatch",
     'inputs_calculation_module': INPUTS_CALCULATION_MODULE,
     
     'authorized_scale' : ["NUTS 3", "NUTS 2","NUTS 1", "NUTS 0","Hectare","LAU 2"]

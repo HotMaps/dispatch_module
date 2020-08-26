@@ -124,10 +124,17 @@ def preprocessing(data,inv_flag):
     demand_th_t =           data["demand_th_t"]
     #%
     max_demad =             max(demand_th_t.values())
-    max_installed_caps =    sum([data["cap"][key] for key in tec])
+    max_installed_caps =    sum([data["cap"][key] for key in tec if key not in j_st])
     ok_flag = True
     if (max_installed_caps <= max_demad) and not inv_flag:
         ok_flag = False
+        error_message = f"The installed capacities (w.o. solar thermal) are not enough to cover the load, (Qmax: {round(max_demad,2)} MW & installed Capacities: {round(max_installed_caps,2)} MW)"
+    
+    for key in tec:
+        if data["cap"][key] > max_demad*2:
+            ok_flag = False
+            error_message = f"The installed capacity of {round(data['cap'][key],2)}MW for {mapper[key]} exceeds the maximum permissible value of {round(max_demad*2,2)}MW"
+            break
     
     radiation_t =                   data["radiation_t"]
     electricity_price_jt =          {(key,t):data["electricity_price_jt"].get((key,t),0) for key in tec for t in range(1,8760+1)}
@@ -165,7 +172,7 @@ def preprocessing(data,inv_flag):
     c_ramp_waste =          data["ramp"]["wi"]
 
     
-    thresh = -20
+    thresh = -50
     all_heat_geneartors = tec    
 
     IK_j = {mapper[key]:data["ic"][key] for key in tec}
@@ -222,7 +229,7 @@ def preprocessing(data,inv_flag):
         
     pyomo_data = {None:pyomo_data} if ok_flag else -1
     
-    message = None if ok_flag else f"The installed capacities are not enough to cover the load, (Qmax: {round(max_demad,2)} MW & installed Capacities: {round(max_installed_caps,2)} MW)"    
+    message = None if ok_flag else error_message    
     
     
     return pyomo_data,message

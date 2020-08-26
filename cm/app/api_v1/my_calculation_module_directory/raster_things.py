@@ -67,10 +67,10 @@ def get_temperature_and_radiation(point,nuts0,target_epsg=4326,init_epsg=3035):
     lat = float(p.geometry.y)
 #    https://re.jrc.ec.europa.eu/pvg_static/web_service.html#HR
     try:
-        req = f"https://re.jrc.ec.europa.eu/pvgis5/tmy.php?lat={lat}&lon={lon}"
-        df = pd.read_csv(req,sep=",")
-        rad = df[" Ghor"].values.tolist()
-        temp = df["Tair"].values.tolist()
+        req = f"https://re.jrc.ec.europa.eu/api/tmy?lat={lat}&lon={lon}"
+        df = pd.read_csv(req,sep=",",skiprows=list(range(16))+list(range(8777,8790)))
+        rad = df["G(h)"].values.tolist()
+        temp = df["T2m"].values.tolist()
     except:
         print("#"*100)
         print("Server https://re.jrc.ec.europa.eu/ not working using local data")
