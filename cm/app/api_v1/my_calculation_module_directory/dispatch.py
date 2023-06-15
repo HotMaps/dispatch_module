@@ -149,7 +149,7 @@ def run(data,inv_flag):
     print("*****************\ntime to create model: " + str(datetime.now()-solv_start)+"\n*****************")
     solv_start = datetime.now()
     print("*****************\nStart Solving...\n*****************")
-    opt = pyo.SolverFactory("gurobi")
+    opt = pyo.SolverFactory("cbc")
     results = opt.solve(instance, load_solutions=False,tee=False,suffixes=['.*'])   # tee= Solver Progress, Suffix um z.B Duale Variablen anzuzeigen -> '.*' für alle
     instance.solutions.load_from(results)
     instance.solutions.store_to(results)
