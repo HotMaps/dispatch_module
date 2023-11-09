@@ -61,7 +61,7 @@ def return_nuts_codes(path_to_raster):
 @decore_message
 def get_temperature_and_radiation(point,nuts0,target_epsg=4326,init_epsg=3035):
     os.environ['PROJ_LIB']  = os.path.join(os.path.dirname(sys.executable),"Library","share")
-    p = gpd.GeoDataFrame([[Point(point)]], geometry='geometry', crs={'init': f'epsg:{init_epsg}'}, columns=['geometry'])   
+    p = gpd.GeoDataFrame([[Point(point)]], geometry='geometry', crs=f'epsg:{init_epsg}', columns=['geometry'])
     p = p.to_crs(epsg=target_epsg)
     lon = float(p.geometry.x)
     lat = float(p.geometry.y)
